@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Masuk — Katalog Digital Talking Book</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/app.css">
+<link rel="stylesheet" href="assets/css/accessibility.css">
+<link rel="stylesheet" href="assets/css/dark-mode.css">
+<style>
+  body.login-page {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 24px;
+  }
+  .login-card { max-width: 420px; width: 100%; }
+  .login-card h1 { font-size: 1.3rem; margin-bottom: 4px; }
+  .login-card .subtitle { color: var(--color-muted); margin-bottom: 24px; }
+  .password-field { position: relative; }
+  .password-field button {
+    position: absolute; right: 8px; top: 34px;
+    background: none; border: none; cursor: pointer; color: var(--color-primary);
+  }
+  .remember-row { display: flex; align-items: center; gap: 8px; margin-bottom: 20px; }
+  .remember-row label { margin: 0; font-weight: 400; }
+</style>
+</head>
+<body class="login-page font-atkinson">
+  <main class="card login-card" role="main">
+    <h1>Katalog Digital Talking Book</h1>
+    <p class="subtitle">Yayasan Mitra Netra</p>
+
+    <div id="login-error" class="login-error hidden" role="alert"></div>
+
+    <form id="login-form" novalidate>
+      <div class="form-field">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" autocomplete="username" required>
+      </div>
+      <div class="form-field password-field">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" autocomplete="current-password" required>
+        <button type="button" id="toggle-password" aria-label="Tampilkan password">👁 Tampilkan</button>
+      </div>
+      <div class="remember-row">
+        <input type="checkbox" id="remember" name="remember">
+        <label for="remember">Ingat saya</label>
+      </div>
+      <button type="submit" class="btn btn-primary" style="width:100%;">Masuk</button>
+    </form>
+  </main>
+
+  <script src="assets/js/accessibility.js"></script>
+  <script src="assets/js/api.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const savedUsername = localStorage.getItem('kdtb_remember_username');
+      if (savedUsername) {
+        document.getElementById('username').value = savedUsername;
+        document.getElementById('remember').checked = true;
+      }
+
+      document.getElementById('toggle-password').addEventListener('click', (e) => {
+        const input = document.getElementById('password');
+        const show = input.type === 'password';
+        input.type = show ? 'text' : 'password';
+        e.currentTarget.textContent = show ? '🙈 Sembunyikan' : '👁 Tampilkan';
+        e.currentTarget.setAttribute('aria-label', show ? 'Sembunyikan password' : 'Tampilkan password');
+      });
+
+      document.getElementById('login-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const username = document.getElementById('username').value.trim();
+        const password = document.getElementById('password').value;
+        const remember = document.getElementById('remember').checked;
+        const errorBox = document.getElementById('login-error');
+        errorBox.classList.add('hidden');
+
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Memproses...';
+
+        try {
+          const res = await Auth.login(username, password);
+          if (res && res.success) {
+            Auth.saveSession(res.token, res.user);
+            if (remember) {
+              localStorage.setItem('kdtb_remember_username', username);
+            } else {
+              localStorage.removeItem('kdtb_remember_username');
+            }
+            window.location.href = 'dashboard.html';
+          } else {
+            errorBox.textContent = (res && (res.errors ? res.errors.join(' ') : res.message)) || 'Login gagal.';
+            errorBox.classList.remove('hidden');
+          }
+        } catch (err) {
+          errorBox.textContent = 'Tidak dapat terhubung ke server. Periksa koneksi Anda.';
+          errorBox.classList.remove('hidden');
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Masuk';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

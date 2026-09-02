@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dashboard — Katalog Digital Talking Book</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/app.css">
+<link rel="stylesheet" href="assets/css/accessibility.css">
+<link rel="stylesheet" href="assets/css/dark-mode.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="font-atkinson">
+<a href="#main-content" class="skip-link">Lewati ke konten utama</a>
+
+<header class="app-header">
+  <div class="brand">
+    <button id="sidebar-toggle" class="icon-btn offcanvas-toggle" aria-label="Buka menu">☰</button>
+    <span>Katalog Digital Talking Book</span>
+  </div>
+  <div class="header-actions">
+    <span id="current-user" style="margin-right:8px;font-size:0.9rem;"></span>
+    <button id="theme-toggle" class="icon-btn">🌙 Gelap</button>
+    <button id="logout-btn" class="icon-btn">Keluar</button>
+  </div>
+</header>
+
+<div class="app-layout">
+  <nav id="sidebar" class="sidebar" aria-label="Menu utama">
+    <a href="dashboard.html" class="nav-link" aria-current="page">📊 Dashboard</a>
+
+    <div class="sidebar-group-label">MASTER</div>
+    <a href="pages/books.html" class="nav-link">📚 Data DTB</a>
+    <a href="#" class="nav-link" aria-disabled="true" title="Segera hadir pada Fase 2">👥 Data Anggota</a>
+
+    <div class="sidebar-group-label">TRANSAKSI</div>
+    <a href="#" class="nav-link" aria-disabled="true" title="Segera hadir pada Fase 2">📖 Peminjaman</a>
+    <a href="#" class="nav-link" aria-disabled="true" title="Segera hadir pada Fase 3">📦 Pesanan</a>
+
+    <div class="sidebar-group-label">PRODUKSI</div>
+    <a href="#" class="nav-link" aria-disabled="true" title="Segera hadir">🎙 Produksi DTB</a>
+
+    <div class="sidebar-group-label">SISTEM</div>
+    <a href="#" class="nav-link" aria-disabled="true" title="Segera hadir">👤 Akun</a>
+    <a href="#" class="nav-link" aria-disabled="true" title="Segera hadir">⚙ Pengaturan</a>
+
+    <div class="sidebar-group-label">AKSESIBILITAS</div>
+    <div class="form-field" style="margin:0 8px 8px;">
+      <label for="font-size-select">Ukuran Font</label>
+      <select id="font-size-select">
+        <option value="100">100%</option>
+        <option value="125">125%</option>
+        <option value="150">150%</option>
+        <option value="175">175%</option>
+        <option value="200">200%</option>
+      </select>
+    </div>
+    <div class="form-field" style="margin:0 8px 8px;">
+      <label for="font-family-select">Jenis Huruf</label>
+      <select id="font-family-select">
+        <option value="atkinson">Atkinson Hyperlegible</option>
+        <option value="arial">Arial</option>
+        <option value="verdana">Verdana</option>
+      </select>
+    </div>
+    <div class="form-field" style="margin:0 8px 8px; display:flex; align-items:center; gap:8px;">
+      <input type="checkbox" id="contrast-toggle">
+      <label for="contrast-toggle" style="margin:0;">Kontras Tinggi</label>
+    </div>
+  </nav>
+
+  <main id="main-content" class="content">
+    <h1>Dashboard</h1>
+    <div id="dashboard-error" class="login-error hidden" role="alert"></div>
+
+    <section class="stat-grid" aria-label="Ringkasan statistik">
+      <div class="card stat-card"><div class="stat-label">Total Judul</div><div class="stat-value" id="stat-total-judul">-</div></div>
+      <div class="card stat-card"><div class="stat-label">Total Anggota</div><div class="stat-value" id="stat-total-anggota">-</div></div>
+      <div class="card stat-card"><div class="stat-label">Peminjaman Bulan Ini</div><div class="stat-value" id="stat-peminjaman-bulan">-</div></div>
+      <div class="card stat-card"><div class="stat-label">Produksi Tahun Ini</div><div class="stat-value" id="stat-produksi-tahun">-</div></div>
+    </section>
+
+    <section class="stat-grid" style="grid-template-columns: 1fr;">
+      <div class="card stat-card"><div class="stat-label">Total Jam Baca</div><div class="stat-value" id="stat-total-jam-baca">-</div></div>
+    </section>
+
+    <section class="chart-grid" aria-label="Grafik statistik buku">
+      <div class="card">
+        <h2>Top 10 Penulis</h2>
+        <canvas id="chart-penulis" role="img" aria-label="Grafik top 10 penulis berdasarkan jumlah judul"></canvas>
+      </div>
+      <div class="card">
+        <h2>Top 10 Pembaca DTB</h2>
+        <canvas id="chart-pembaca" role="img" aria-label="Grafik top 10 pembaca DTB"></canvas>
+      </div>
+    </section>
+    <section class="chart-grid" style="grid-template-columns: 1fr;">
+      <div class="card">
+        <h2>Top 10 Jam Baca per Pembaca</h2>
+        <canvas id="chart-jam-baca" role="img" aria-label="Grafik top 10 jam baca per pembaca"></canvas>
+      </div>
+    </section>
+
+    <p style="color:var(--color-muted); font-size:0.9rem;">
+      Grafik peminjaman dan produksi bulanan akan tersedia setelah modul Peminjaman (Fase 2) dan Produksi DTB dibangun.
+    </p>
+  </main>
+</div>
+
+<script src="assets/js/accessibility.js"></script>
+<script src="assets/js/api.js"></script>
+<script src="assets/js/auth.js"></script>
+<script src="assets/js/app.js"></script>
+<script src="assets/js/dashboard.js"></script>
+</body>
+</html>
