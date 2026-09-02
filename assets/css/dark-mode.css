@@ -1,0 +1,13 @@
+[data-theme="dark"] {
+  --color-bg: #101820;
+  --color-card: #18252E;
+  --color-text: #F5F5F5;
+  --color-border: #2A3A45;
+  --color-primary: #4CAF50;
+  --color-primary-dark: #3D8B40;
+  --color-muted: #9AA7B0;
+}
+
+[data-theme="dark"] .login-error {
+  background: #3A1F1D;
+}

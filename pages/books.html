@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Data DTB — Katalog Digital Talking Book</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/app.css">
+<link rel="stylesheet" href="../assets/css/accessibility.css">
+<link rel="stylesheet" href="../assets/css/dark-mode.css">
+<style>
+  .detail-list { display: grid; grid-template-columns: 160px 1fr; gap: 8px 16px; }
+  .detail-list dt { font-weight: 600; color: var(--color-muted); }
+  .detail-list dd { margin: 0; }
+  .link-like {
+    background: none; border: none; color: var(--color-primary);
+    text-decoration: underline; cursor: pointer; font-size: inherit; padding: 0; text-align: left;
+  }
+</style>
+</head>
+<body class="font-atkinson">
+<a href="#main-content" class="skip-link">Lewati ke konten utama</a>
+
+<header class="app-header">
+  <div class="brand">
+    <button id="sidebar-toggle" class="icon-btn offcanvas-toggle" aria-label="Buka menu">☰</button>
+    <span>Katalog Digital Talking Book</span>
+  </div>
+  <div class="header-actions">
+    <span id="current-user" style="margin-right:8px;font-size:0.9rem;"></span>
+    <button id="theme-toggle" class="icon-btn">🌙 Gelap</button>
+    <button id="logout-btn" class="icon-btn">Keluar</button>
+  </div>
+</header>
+
+<div class="app-layout">
+  <nav id="sidebar" class="sidebar" aria-label="Menu utama">
+    <a href="../dashboard.html" class="nav-link">📊 Dashboard</a>
+
+    <div class="sidebar-group-label">MASTER</div>
+    <a href="books.html" class="nav-link" aria-current="page">📚 Data DTB</a>
+    <a href="#" class="nav-link" aria-disabled="true" title="Segera hadir pada Fase 2">👥 Data Anggota</a>
+
+    <div class="sidebar-group-label">TRANSAKSI</div>
+    <a href="#" class="nav-link" aria-disabled="true" title="Segera hadir pada Fase 2">📖 Peminjaman</a>
+    <a href="#" class="nav-link" aria-disabled="true" title="Segera hadir pada Fase 3">📦 Pesanan</a>
+
+    <div class="sidebar-group-label">PRODUKSI</div>
+    <a href="#" class="nav-link" aria-disabled="true" title="Segera hadir">🎙 Produksi DTB</a>
+
+    <div class="sidebar-group-label">SISTEM</div>
+    <a href="#" class="nav-link" aria-disabled="true" title="Segera hadir">👤 Akun</a>
+    <a href="#" class="nav-link" aria-disabled="true" title="Segera hadir">⚙ Pengaturan</a>
+
+    <div class="sidebar-group-label">AKSESIBILITAS</div>
+    <div class="form-field" style="margin:0 8px 8px;">
+      <label for="font-size-select">Ukuran Font</label>
+      <select id="font-size-select">
+        <option value="100">100%</option>
+        <option value="125">125%</option>
+        <option value="150">150%</option>
+        <option value="175">175%</option>
+        <option value="200">200%</option>
+      </select>
+    </div>
+    <div class="form-field" style="margin:0 8px 8px;">
+      <label for="font-family-select">Jenis Huruf</label>
+      <select id="font-family-select">
+        <option value="atkinson">Atkinson Hyperlegible</option>
+        <option value="arial">Arial</option>
+        <option value="verdana">Verdana</option>
+      </select>
+    </div>
+    <div class="form-field" style="margin:0 8px 8px; display:flex; align-items:center; gap:8px;">
+      <input type="checkbox" id="contrast-toggle">
+      <label for="contrast-toggle" style="margin:0;">Kontras Tinggi</label>
+    </div>
+  </nav>
+
+  <main id="main-content" class="content">
+    <h1>Data DTB</h1>
+
+    <div class="toolbar">
+      <button id="btn-add-book" class="btn btn-primary">+ Tambah Buku</button>
+      <div class="search-box">
+        <label for="search-input" class="sr-only">Cari buku</label>
+        <input type="text" id="search-input" placeholder="Cari buku...">
+        <div id="suggest-list" class="suggest-list hidden"></div>
+      </div>
+      <div class="form-field" style="margin:0; min-width:160px;">
+        <label for="search-field" class="sr-only">Cari berdasarkan</label>
+        <select id="search-field">
+          <option value="Judul">Judul</option>
+          <option value="Pengarang">Pengarang</option>
+          <option value="Pembaca DTB">Pembaca</option>
+          <option value="Penerbit">Penerbit</option>
+          <option value="Tahun">Tahun</option>
+        </select>
+      </div>
+    </div>
+
+    <p id="books-count" style="color:var(--color-muted);"></p>
+    <p id="books-empty" class="hidden" role="status"></p>
+
+    <div class="card" style="overflow-x:auto;">
+      <table class="data-table responsive-cards">
+        <thead>
+          <tr>
+            <th scope="col">Judul</th>
+            <th scope="col">Pengarang</th>
+            <th scope="col">Pembaca DTB</th>
+            <th scope="col">Tahun</th>
+            <th scope="col">Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="books-tbody"></tbody>
+      </table>
+    </div>
+  </main>
+</div>
+
+<div id="form-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="form-title">
+  <div class="modal-box">
+    <h2 id="form-title">Tambah Buku</h2>
+    <div id="form-error" class="login-error hidden" role="alert"></div>
+    <form id="book-form" novalidate>
+      <div class="form-field"><label for="f-judul">Judul *</label><input type="text" id="f-judul" name="Judul" required></div>
+      <div class="form-field"><label for="f-subjudul">Sub Judul</label><input type="text" id="f-subjudul" name="Sub Judul"></div>
+      <div class="form-field"><label for="f-keterangan">Keterangan</label><textarea id="f-keterangan" name="Keterangan" rows="2"></textarea></div>
+      <div class="form-row">
+        <div class="form-field"><label for="f-pengarang">Pengarang *</label><input type="text" id="f-pengarang" name="Pengarang" required></div>
+        <div class="form-field"><label for="f-penerbit">Penerbit</label><input type="text" id="f-penerbit" name="Penerbit"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-field"><label for="f-cetakan">Cetakan</label><input type="text" id="f-cetakan" name="Cetakan"></div>
+        <div class="form-field"><label for="f-tahun">Tahun</label><input type="number" id="f-tahun" name="Tahun"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-field"><label for="f-halaman">Halaman</label><input type="number" id="f-halaman" name="Halaman"></div>
+        <div class="form-field"><label for="f-pembaca">Pembaca DTB</label><input type="text" id="f-pembaca" name="Pembaca DTB"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-field"><label for="f-editor">Editor DTB</label><input type="text" id="f-editor" name="Editor DTB"></div>
+        <div class="form-field"><label for="f-jambaca">Jam Baca DTB</label><input type="number" id="f-jambaca" name="Jam Baca DTB"></div>
+      </div>
+      <div class="form-field"><label for="f-jamedit">Jam Edit DTB</label><input type="number" id="f-jamedit" name="Jam Edit DTB"></div>
+      <div class="form-field"><label for="f-alamatfile">Alamat File DTB</label><input type="text" id="f-alamatfile" name="Alamat File DTB"></div>
+      <div style="display:flex; gap:12px; justify-content:flex-end; margin-top:8px;">
+        <button type="button" id="btn-cancel-form" class="btn btn-outline">Batal</button>
+        <button type="submit" class="btn btn-primary">Simpan</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="detail-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="detail-title">
+  <div class="modal-box">
+    <h2 id="detail-title">Detail Buku</h2>
+    <div id="detail-body"></div>
+    <div style="text-align:right; margin-top:16px;">
+      <button type="button" id="btn-close-detail" class="btn btn-outline">Tutup</button>
+    </div>
+  </div>
+</div>
+
+<script src="../assets/js/accessibility.js"></script>
+<script src="../assets/js/api.js"></script>
+<script src="../assets/js/auth.js"></script>
+<script src="../assets/js/app.js"></script>
+<script src="../assets/js/books.js"></script>
+</body>
+</html>

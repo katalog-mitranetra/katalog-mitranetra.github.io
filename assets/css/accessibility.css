@@ -1,0 +1,55 @@
+:root { --font-scale: 1; }
+html { font-size: calc(16px * var(--font-scale)); }
+
+.fs-100 { --font-scale: 1; }
+.fs-125 { --font-scale: 1.25; }
+.fs-150 { --font-scale: 1.5; }
+.fs-175 { --font-scale: 1.75; }
+.fs-200 { --font-scale: 2; }
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: 3px solid #FFD600;
+  outline-offset: 2px;
+}
+
+body.font-arial { font-family: Arial, sans-serif; }
+body.font-verdana { font-family: Verdana, sans-serif; }
+body.font-atkinson { font-family: 'Atkinson Hyperlegible', Arial, sans-serif; }
+
+.high-contrast {
+  --color-bg: #000000 !important;
+  --color-card: #000000 !important;
+  --color-text: #FFFFFF !important;
+  --color-border: #FFFFFF !important;
+  --color-primary: #FFEB3B !important;
+  --color-muted: #DDDDDD !important;
+}
+.high-contrast a { color: #FFEB3B !important; }
+.high-contrast .btn-primary { background: #FFEB3B !important; color: #000 !important; }
+.high-contrast .app-header { background: #000 !important; border-bottom: 2px solid #FFEB3B; }
+
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: absolute;
+  left: -999px;
+  top: auto;
+  background: #000;
+  color: #fff;
+  padding: 10px 16px;
+  z-index: 999;
+}
+.skip-link:focus { left: 8px; top: 8px; }
