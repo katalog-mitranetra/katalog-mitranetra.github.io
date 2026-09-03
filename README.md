@@ -1,7 +1,8 @@
-# Katalog Digital Talking Book (KDTB) — Fase 1 & Fase 2
+# Katalog Digital Talking Book (KDTB) — Fase 1, 2 & 3
 
 - Fase 1: **Login → Dashboard → Data DTB (CRUD)**
 - Fase 2: **Data Anggota (CRUD) → Peminjaman (cari anggota, cari buku + entri manual, keranjang, simpan transaksi, riwayat + ubah status)**
+- Fase 3: **Pesanan → Kirim ke Operator via WhatsApp**
 
 sesuai SRS.
 
@@ -9,7 +10,7 @@ sesuai SRS.
 
 1. Buat Google Sheet baru, misalnya beri nama `DB_KDTB`.
 2. Buka **Extensions > Apps Script**.
-3. Hapus isi `Code.gs` bawaan, lalu buat 11 file `.gs` berikut (nama file harus sama persis) dan salin isinya dari folder `apps-script/` di paket ini:
+3. Hapus isi `Code.gs` bawaan, lalu buat 12 file `.gs` berikut (nama file harus sama persis) dan salin isinya dari folder `apps-script/` di paket ini:
    - `Config.gs`
    - `Utils.gs`
    - `Validation.gs`
@@ -18,6 +19,7 @@ sesuai SRS.
    - `Books.gs`
    - `Anggota.gs`
    - `MasterData.gs`
+   - `Settings.gs`
    - `Loans.gs`
    - `Dashboard.gs`
    - `Code.gs`
@@ -56,7 +58,8 @@ katalog-dtb/
 ├── pages/
 │   ├── books.html        # Data DTB (CRUD)
 │   ├── members.html      # Data Anggota (CRUD)
-│   └── loans.html        # Peminjaman (transaksi + riwayat)
+│   ├── loans.html        # Peminjaman (transaksi + riwayat)
+│   └── orders.html       # Pesanan (kirim ke operator via WhatsApp)
 ├── assets/
 │   ├── css/
 │   │   ├── app.css
@@ -70,7 +73,8 @@ katalog-dtb/
 │       ├── dashboard.js
 │       ├── books.js
 │       ├── members.js
-│       └── loans.js
+│       ├── loans.js
+│       └── orders.js
 └── apps-script/
     ├── Config.gs
     ├── Utils.gs
@@ -80,6 +84,7 @@ katalog-dtb/
     ├── Books.gs
     ├── Anggota.gs
     ├── MasterData.gs
+    ├── Settings.gs
     ├── Loans.gs
     ├── Dashboard.gs
     └── Code.gs            # doGet/doPost router + setupSheets()
@@ -99,10 +104,18 @@ katalog-dtb/
 - Simpan transaksi membuat 1 baris di `PEMINJAMAN` + N baris di `PEMINJAMAN_DETAIL` (kolom `Sumber` menandai `Katalog` atau `Manual`).
 - Riwayat Peminjaman: daftar transaksi, filter status, cari nama anggota/nomor peminjaman, ubah status langsung dari tabel (Draft/Menunggu/Diproses/Dikirim/Selesai/Dibatalkan), dan detail per transaksi.
 
-## 7. Belum Dikerjakan (Fase 3+)
+## 7. Yang Sudah Jalan di Fase 3
 
-Pesanan + kirim WhatsApp ke operator, Produksi DTB, Akun (ganti password dari UI), Pengaturan, Log Aktivitas viewer, backup otomatis — menyusul sesuai urutan fase pada SRS.
+- Halaman **Pesanan**: kartu pesanan (sesuai mockup SRS) dengan filter status (default: Menunggu) dan pencarian.
+- **Nomor WhatsApp Operator** disimpan di sheet `SETTING` (key `NOMOR_OPERATOR`), bisa diubah kapan saja dari halaman Pesanan.
+- Tombol **Kirim WA** membuka WhatsApp Web/App ke nomor operator dengan pesan otomatis berisi nomor pesanan, tanggal, nama & telepon anggota, daftar buku (judul, penulis, pembaca, alamat file), dan jenis koleksi — persis format template pada SRS.
+- Setelah dikirim, status pesanan otomatis berubah dari **Menunggu** menjadi **Dikirim** (masih bisa diubah manual dari halaman Peminjaman jika perlu).
+- Nomor telepon (operator maupun anggota) dirapikan otomatis ke format internasional (`08...` → `62...`) sebelum dipakai di link `wa.me`.
 
-## 8. Catatan Keamanan
+## 8. Belum Dikerjakan (Fase 4+)
+
+Statistik lanjutan (grafik peminjaman & produksi bulanan gabungan), Produksi DTB, Akun (ganti password dari UI), Pengaturan (kelola Master Jenis dari UI), Log Aktivitas viewer, backup otomatis — menyusul sesuai urutan fase pada SRS.
+
+## 9. Catatan Keamanan
 
 Password di-hash SHA-256 sebelum disimpan (tidak plain text). Tetap disarankan menambahkan salt per-user pada iterasi berikutnya untuk pertahanan lebih baik terhadap rainbow table.

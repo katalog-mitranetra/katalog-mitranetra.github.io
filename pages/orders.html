@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pesanan — Katalog Digital Talking Book</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/app.css">
+<link rel="stylesheet" href="../assets/css/accessibility.css">
+<link rel="stylesheet" href="../assets/css/dark-mode.css">
+<style>
+  .detail-list { display: grid; grid-template-columns: 160px 1fr; gap: 8px 16px; }
+  .detail-list dt { font-weight: 600; color: var(--color-muted); }
+  .detail-list dd { margin: 0; }
+
+  .operator-row {
+    display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap;
+  }
+  .operator-row .form-field { margin: 0; flex: 1; min-width: 220px; }
+  #operator-save-msg { color: var(--color-primary); font-weight: 600; }
+
+  .orders-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+  }
+  .order-card { display: flex; flex-direction: column; gap: 4px; }
+  .order-card-number { font-weight: 700; color: var(--color-primary); }
+  .order-card-member { font-size: 1.05rem; }
+  .order-card-date, .order-card-meta { color: var(--color-muted); font-size: 0.9rem; }
+  .order-card-status { margin: 6px 0; }
+  .order-card-actions { display: flex; gap: 8px; margin-top: auto; padding-top: 8px; }
+</style>
+</head>
+<body class="font-atkinson">
+<a href="#main-content" class="skip-link">Lewati ke konten utama</a>
+
+<header class="app-header">
+  <div class="brand">
+    <button id="sidebar-toggle" class="icon-btn offcanvas-toggle" aria-label="Buka menu">☰</button>
+    <span>Katalog Digital Talking Book</span>
+  </div>
+  <div class="header-actions">
+    <span id="current-user" style="margin-right:8px;font-size:0.9rem;"></span>
+    <button id="theme-toggle" class="icon-btn">🌙 Gelap</button>
+    <button id="logout-btn" class="icon-btn">Keluar</button>
+  </div>
+</header>
+
+<div class="app-layout">
+  <nav id="sidebar" class="sidebar" aria-label="Menu utama">
+    <a href="../dashboard.html" class="nav-link">📊 Dashboard</a>
+
+    <div class="sidebar-group-label">MASTER</div>
+    <a href="books.html" class="nav-link">📚 Data DTB</a>
+    <a href="members.html" class="nav-link">👥 Data Anggota</a>
+
+    <div class="sidebar-group-label">TRANSAKSI</div>
+    <a href="loans.html" class="nav-link">📖 Peminjaman</a>
+    <a href="orders.html" class="nav-link" aria-current="page">📦 Pesanan</a>
+
+    <div class="sidebar-group-label">PRODUKSI</div>
+    <a href="#" class="nav-link" aria-disabled="true" title="Segera hadir">🎙 Produksi DTB</a>
+
+    <div class="sidebar-group-label">SISTEM</div>
+    <a href="#" class="nav-link" aria-disabled="true" title="Segera hadir">👤 Akun</a>
+    <a href="#" class="nav-link" aria-disabled="true" title="Segera hadir">⚙ Pengaturan</a>
+
+    <div class="sidebar-group-label">AKSESIBILITAS</div>
+    <div class="form-field" style="margin:0 8px 8px;">
+      <label for="font-size-select">Ukuran Font</label>
+      <select id="font-size-select">
+        <option value="100">100%</option>
+        <option value="125">125%</option>
+        <option value="150">150%</option>
+        <option value="175">175%</option>
+        <option value="200">200%</option>
+      </select>
+    </div>
+    <div class="form-field" style="margin:0 8px 8px;">
+      <label for="font-family-select">Jenis Huruf</label>
+      <select id="font-family-select">
+        <option value="atkinson">Atkinson Hyperlegible</option>
+        <option value="arial">Arial</option>
+        <option value="verdana">Verdana</option>
+      </select>
+    </div>
+    <div class="form-field" style="margin:0 8px 8px; display:flex; align-items:center; gap:8px;">
+      <input type="checkbox" id="contrast-toggle">
+      <label for="contrast-toggle" style="margin:0;">Kontras Tinggi</label>
+    </div>
+  </nav>
+
+  <main id="main-content" class="content">
+    <h1>Pesanan</h1>
+
+    <div class="card" style="margin-bottom:24px;">
+      <h2 style="margin-top:0;">Nomor WhatsApp Operator</h2>
+      <p style="color:var(--color-muted); margin-top:-8px;">Pesanan akan dikirim ke nomor ini lewat WhatsApp Web. Boleh diawali 08... atau +62..., akan dirapikan otomatis.</p>
+      <div class="operator-row">
+        <div class="form-field">
+          <label for="operator-phone" class="sr-only">Nomor WhatsApp Operator</label>
+          <input type="text" id="operator-phone" placeholder="08123456789">
+        </div>
+        <button type="button" id="btn-save-operator" class="btn btn-primary">Simpan</button>
+        <span id="operator-save-msg" class="hidden" role="status">Tersimpan.</span>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <div class="search-box">
+        <label for="order-search" class="sr-only">Cari pesanan</label>
+        <input type="text" id="order-search" placeholder="Cari nama anggota atau nomor pesanan...">
+      </div>
+      <div class="form-field" style="margin:0; min-width:180px;">
+        <label for="order-status-filter" class="sr-only">Filter status</label>
+        <select id="order-status-filter">
+          <option value="Menunggu" selected>Menunggu</option>
+          <option value="Diproses">Diproses</option>
+          <option value="Dikirim">Dikirim</option>
+          <option value="Selesai">Selesai</option>
+          <option value="Dibatalkan">Dibatalkan</option>
+          <option value="">Semua Status</option>
+        </select>
+      </div>
+    </div>
+
+    <p id="orders-empty" class="hidden" role="status"></p>
+
+    <div id="orders-grid" class="orders-grid"></div>
+  </main>
+</div>
+
+<div id="order-detail-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="order-detail-title">
+  <div class="modal-box">
+    <h2 id="order-detail-title">Detail Pesanan</h2>
+    <div id="order-detail-body"></div>
+    <div style="text-align:right; margin-top:16px;">
+      <button type="button" id="btn-close-order-detail" class="btn btn-outline">Tutup</button>
+    </div>
+  </div>
+</div>
+
+<script src="../assets/js/accessibility.js"></script>
+<script src="../assets/js/api.js"></script>
+<script src="../assets/js/auth.js"></script>
+<script src="../assets/js/app.js"></script>
+<script src="../assets/js/orders.js"></script>
+</body>
+</html>
