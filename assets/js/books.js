@@ -92,8 +92,9 @@ function rowTemplate(b) {
     <tr>
       <td data-label="Judul"><button type="button" class="link-like" data-action="detail" data-id="${b['ID Buku']}">${escapeHtml(b.Judul)}</button></td>
       <td data-label="Pengarang">${escapeHtml(b.Pengarang || '-')}</td>
+      <td data-label="Penerbit">${escapeHtml(b.Penerbit || '-')}</td>
       <td data-label="Pembaca DTB">${escapeHtml(b['Pembaca DTB'] || '-')}</td>
-      <td data-label="Tahun">${escapeHtml(b.Tahun || '-')}</td>
+      <td data-label="Tanggal Produksi">${escapeHtml(formatDate(b['Tanggal Produksi']))}</td>
       <td data-label="Aksi">
         <button type="button" class="btn btn-outline" data-action="detail" data-id="${b['ID Buku']}" aria-label="Lihat detail ${escapeHtml(b.Judul)}">Detail</button>
         <button type="button" class="btn btn-outline" data-action="edit" data-id="${b['ID Buku']}" aria-label="Ubah ${escapeHtml(b.Judul)}">Ubah</button>
@@ -120,6 +121,7 @@ async function openDetail(id) {
       <dt>Editor DTB</dt><dd>${escapeHtml(b['Editor DTB'] || '-')}</dd>
       <dt>Jam Baca DTB</dt><dd>${escapeHtml(b['Jam Baca DTB'] || '-')}</dd>
       <dt>Jam Edit DTB</dt><dd>${escapeHtml(b['Jam Edit DTB'] || '-')}</dd>
+      <dt>Tanggal Produksi</dt><dd>${escapeHtml(formatDate(b['Tanggal Produksi']) || '-')}</dd>
       <dt>Alamat File DTB</dt><dd>${escapeHtml(b['Alamat File DTB'] || '-')}</dd>
       <dt>Status</dt><dd>${escapeHtml(b.Status || '-')}</dd>
     </dl>`;
@@ -143,7 +145,8 @@ function openForm(id) {
       const b = res.data;
       Object.keys(b).forEach(key => {
         const input = form.elements.namedItem(key);
-        if (input) input.value = b[key];
+        if (!input) return;
+        input.value = key === 'Tanggal Produksi' ? toDateInputValue(b[key]) : b[key];
       });
     });
   }
@@ -160,7 +163,8 @@ async function onSubmitForm(e) {
   const form = e.target;
   const data = {};
   ['Judul', 'Sub Judul', 'Keterangan', 'Pengarang', 'Penerbit', 'Cetakan', 'Tahun', 'Halaman',
-    'Pembaca DTB', 'Editor DTB', 'Jam Baca DTB', 'Jam Edit DTB', 'Alamat File DTB'].forEach(field => {
+    'Pembaca DTB', 'Editor DTB', 'Jam Baca DTB', 'Jam Edit DTB', 'Tanggal Produksi',
+    'Alamat File DTB'].forEach(field => {
     const input = form.elements.namedItem(field);
     if (input) data[field] = input.value;
   });
@@ -188,6 +192,29 @@ async function onDelete(id, title) {
     return;
   }
   loadBooks();
+}
+
+function extractDateParts(value) {
+  if (!value) return null;
+  const match = String(value).match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (match) return { yyyy: match[1], mm: match[2], dd: match[3] };
+  const d = new Date(value);
+  if (isNaN(d)) return null;
+  return {
+    yyyy: String(d.getFullYear()),
+    mm: String(d.getMonth() + 1).padStart(2, '0'),
+    dd: String(d.getDate()).padStart(2, '0')
+  };
+}
+
+function formatDate(value) {
+  const p = extractDateParts(value);
+  return p ? (p.dd + '/' + p.mm + '/' + p.yyyy) : '';
+}
+
+function toDateInputValue(value) {
+  const p = extractDateParts(value);
+  return p ? (p.yyyy + '-' + p.mm + '-' + p.dd) : '';
 }
 
 function escapeHtml(value) {
