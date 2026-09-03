@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Peminjaman — Katalog Digital Talking Book</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/app.css">
+<link rel="stylesheet" href="../assets/css/accessibility.css">
+<link rel="stylesheet" href="../assets/css/dark-mode.css">
+<style>
+  .detail-list { display: grid; grid-template-columns: 160px 1fr; gap: 8px 16px; }
+  .detail-list dt { font-weight: 600; color: var(--color-muted); }
+  .detail-list dd { margin: 0; }
+  .section-title { margin-top: 32px; }
+  #selected-member-box {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px; border: 1px solid var(--color-border); border-radius: var(--radius);
+    background: var(--color-bg);
+  }
+</style>
+</head>
+<body class="font-atkinson">
+<a href="#main-content" class="skip-link">Lewati ke konten utama</a>
+
+<header class="app-header">
+  <div class="brand">
+    <button id="sidebar-toggle" class="icon-btn offcanvas-toggle" aria-label="Buka menu">☰</button>
+    <span>Katalog Digital Talking Book</span>
+  </div>
+  <div class="header-actions">
+    <span id="current-user" style="margin-right:8px;font-size:0.9rem;"></span>
+    <button id="theme-toggle" class="icon-btn">🌙 Gelap</button>
+    <button id="logout-btn" class="icon-btn">Keluar</button>
+  </div>
+</header>
+
+<div class="app-layout">
+  <nav id="sidebar" class="sidebar" aria-label="Menu utama">
+    <a href="../dashboard.html" class="nav-link">📊 Dashboard</a>
+
+    <div class="sidebar-group-label">MASTER</div>
+    <a href="books.html" class="nav-link">📚 Data DTB</a>
+    <a href="members.html" class="nav-link">👥 Data Anggota</a>
+
+    <div class="sidebar-group-label">TRANSAKSI</div>
+    <a href="loans.html" class="nav-link" aria-current="page">📖 Peminjaman</a>
+    <a href="#" class="nav-link" aria-disabled="true" title="Segera hadir pada Fase 3">📦 Pesanan</a>
+
+    <div class="sidebar-group-label">PRODUKSI</div>
+    <a href="#" class="nav-link" aria-disabled="true" title="Segera hadir">🎙 Produksi DTB</a>
+
+    <div class="sidebar-group-label">SISTEM</div>
+    <a href="#" class="nav-link" aria-disabled="true" title="Segera hadir">👤 Akun</a>
+    <a href="#" class="nav-link" aria-disabled="true" title="Segera hadir">⚙ Pengaturan</a>
+
+    <div class="sidebar-group-label">AKSESIBILITAS</div>
+    <div class="form-field" style="margin:0 8px 8px;">
+      <label for="font-size-select">Ukuran Font</label>
+      <select id="font-size-select">
+        <option value="100">100%</option>
+        <option value="125">125%</option>
+        <option value="150">150%</option>
+        <option value="175">175%</option>
+        <option value="200">200%</option>
+      </select>
+    </div>
+    <div class="form-field" style="margin:0 8px 8px;">
+      <label for="font-family-select">Jenis Huruf</label>
+      <select id="font-family-select">
+        <option value="atkinson">Atkinson Hyperlegible</option>
+        <option value="arial">Arial</option>
+        <option value="verdana">Verdana</option>
+      </select>
+    </div>
+    <div class="form-field" style="margin:0 8px 8px; display:flex; align-items:center; gap:8px;">
+      <input type="checkbox" id="contrast-toggle">
+      <label for="contrast-toggle" style="margin:0;">Kontras Tinggi</label>
+    </div>
+  </nav>
+
+  <main id="main-content" class="content">
+    <h1>Peminjaman</h1>
+
+    <div id="loan-form-error" class="login-error hidden" role="alert"></div>
+
+    <div class="card">
+      <h2>Peminjaman Baru</h2>
+
+      <div class="form-row">
+        <div class="form-field">
+          <label for="l-tanggal">Tanggal</label>
+          <input type="date" id="l-tanggal">
+        </div>
+        <div class="form-field">
+          <label for="l-jenis">Jenis</label>
+          <select id="l-jenis"></select>
+        </div>
+      </div>
+
+      <div class="form-field">
+        <label id="member-label">Anggota</label>
+        <div id="member-search-wrap" style="position:relative;">
+          <input type="text" id="member-search-input" placeholder="Cari nama atau nomor anggota..." aria-labelledby="member-label">
+          <div id="member-suggest-list" class="suggest-list hidden"></div>
+        </div>
+        <div id="selected-member-box" class="hidden">
+          <div>
+            <strong id="selected-member-name"></strong><br>
+            <span id="selected-member-phone" style="color:var(--color-muted); font-size:0.9rem;"></span>
+          </div>
+          <button type="button" id="btn-change-member" class="btn btn-outline">Ganti</button>
+        </div>
+      </div>
+
+      <div class="form-field">
+        <label id="book-search-label">Cari Buku</label>
+        <input type="text" id="book-search-input" placeholder="Cari judul buku..." aria-labelledby="book-search-label">
+        <div id="book-search-results" style="margin-top:8px;"></div>
+        <div id="manual-hint" class="hidden" style="margin-top:8px; color:var(--color-muted);">
+          Tidak ditemukan di katalog.
+          <button type="button" id="btn-add-manual" class="btn btn-outline" style="margin-left:8px;">+ Tambahkan Judul Manual</button>
+        </div>
+      </div>
+      <p style="margin-top:-8px;">
+        <button type="button" id="btn-add-manual-standalone" class="btn btn-outline" onclick="document.getElementById('btn-add-manual').click()">+ Tambah Judul Manual (EPub/Braille)</button>
+      </p>
+
+      <h3>Daftar Buku Dipinjam</h3>
+      <div id="cart-list"></div>
+      <p id="cart-count" style="font-weight:700;">TOTAL: 0 BUKU</p>
+
+      <button type="button" id="btn-save-loan" class="btn btn-primary">Simpan Peminjaman</button>
+    </div>
+
+    <h2 class="section-title">Riwayat Peminjaman</h2>
+    <div class="toolbar">
+      <div class="search-box">
+        <label for="loan-history-search" class="sr-only">Cari peminjaman</label>
+        <input type="text" id="loan-history-search" placeholder="Cari nama anggota atau nomor peminjaman...">
+      </div>
+      <div class="form-field" style="margin:0; min-width:160px;">
+        <label for="loan-status-filter" class="sr-only">Filter status</label>
+        <select id="loan-status-filter">
+          <option value="">Semua Status</option>
+          <option value="Draft">Draft</option>
+          <option value="Menunggu">Menunggu</option>
+          <option value="Diproses">Diproses</option>
+          <option value="Dikirim">Dikirim</option>
+          <option value="Selesai">Selesai</option>
+          <option value="Dibatalkan">Dibatalkan</option>
+        </select>
+      </div>
+    </div>
+
+    <p id="loans-count" style="color:var(--color-muted);"></p>
+    <p id="loans-empty" class="hidden" role="status"></p>
+
+    <div class="card" style="overflow-x:auto;">
+      <table class="data-table responsive-cards">
+        <thead>
+          <tr>
+            <th scope="col">Nomor</th>
+            <th scope="col">Tanggal</th>
+            <th scope="col">Anggota</th>
+            <th scope="col">Total Buku</th>
+            <th scope="col">Status</th>
+            <th scope="col">Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="loans-tbody"></tbody>
+      </table>
+    </div>
+  </main>
+</div>
+
+<div id="manual-form-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="manual-form-title">
+  <div class="modal-box">
+    <h2 id="manual-form-title">Tambah Judul Manual</h2>
+    <p style="color:var(--color-muted);">Untuk EPub/Braille/format lain yang judulnya belum ada di katalog Data DTB.</p>
+    <form id="manual-item-form" novalidate>
+      <div class="form-field"><label for="mi-judul">Judul *</label><input type="text" id="mi-judul" name="Judul" required></div>
+      <div class="form-row">
+        <div class="form-field"><label for="mi-pengarang">Pengarang</label><input type="text" id="mi-pengarang" name="Pengarang"></div>
+        <div class="form-field"><label for="mi-penerbit">Penerbit</label><input type="text" id="mi-penerbit" name="Penerbit"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-field"><label for="mi-cetakan">Cetakan</label><input type="text" id="mi-cetakan" name="Cetakan"></div>
+        <div class="form-field"><label for="mi-tahun">Tahun</label><input type="number" id="mi-tahun" name="Tahun"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-field"><label for="mi-pembaca">Pembaca</label><input type="text" id="mi-pembaca" name="Pembaca"></div>
+        <div class="form-field"><label for="mi-editor">Editor</label><input type="text" id="mi-editor" name="Editor"></div>
+      </div>
+      <div class="form-field" style="display:flex; align-items:center; gap:8px;">
+        <input type="checkbox" id="mi-simpanmaster" name="SimpanSebagaiMaster">
+        <label for="mi-simpanmaster" style="margin:0;">Simpan juga sebagai master buku (Data DTB)</label>
+      </div>
+      <div style="display:flex; gap:12px; justify-content:flex-end; margin-top:8px;">
+        <button type="button" id="btn-cancel-manual" class="btn btn-outline">Batal</button>
+        <button type="submit" class="btn btn-primary">Tambah ke Keranjang</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="loan-detail-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="loan-detail-title">
+  <div class="modal-box">
+    <h2 id="loan-detail-title">Detail Peminjaman</h2>
+    <div id="loan-detail-body"></div>
+    <div style="text-align:right; margin-top:16px;">
+      <button type="button" id="btn-close-loan-detail" class="btn btn-outline">Tutup</button>
+    </div>
+  </div>
+</div>
+
+<script src="../assets/js/accessibility.js"></script>
+<script src="../assets/js/api.js"></script>
+<script src="../assets/js/auth.js"></script>
+<script src="../assets/js/app.js"></script>
+<script src="../assets/js/loans.js"></script>
+</body>
+</html>

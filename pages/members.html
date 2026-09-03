@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Data Anggota — Katalog Digital Talking Book</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/app.css">
+<link rel="stylesheet" href="../assets/css/accessibility.css">
+<link rel="stylesheet" href="../assets/css/dark-mode.css">
+<style>
+  .detail-list { display: grid; grid-template-columns: 160px 1fr; gap: 8px 16px; }
+  .detail-list dt { font-weight: 600; color: var(--color-muted); }
+  .detail-list dd { margin: 0; }
+  .link-like {
+    background: none; border: none; color: var(--color-primary);
+    text-decoration: underline; cursor: pointer; font-size: inherit; padding: 0; text-align: left;
+  }
+</style>
+</head>
+<body class="font-atkinson">
+<a href="#main-content" class="skip-link">Lewati ke konten utama</a>
+
+<header class="app-header">
+  <div class="brand">
+    <button id="sidebar-toggle" class="icon-btn offcanvas-toggle" aria-label="Buka menu">☰</button>
+    <span>Katalog Digital Talking Book</span>
+  </div>
+  <div class="header-actions">
+    <span id="current-user" style="margin-right:8px;font-size:0.9rem;"></span>
+    <button id="theme-toggle" class="icon-btn">🌙 Gelap</button>
+    <button id="logout-btn" class="icon-btn">Keluar</button>
+  </div>
+</header>
+
+<div class="app-layout">
+  <nav id="sidebar" class="sidebar" aria-label="Menu utama">
+    <a href="../dashboard.html" class="nav-link">📊 Dashboard</a>
+
+    <div class="sidebar-group-label">MASTER</div>
+    <a href="books.html" class="nav-link">📚 Data DTB</a>
+    <a href="members.html" class="nav-link" aria-current="page">👥 Data Anggota</a>
+
+    <div class="sidebar-group-label">TRANSAKSI</div>
+    <a href="loans.html" class="nav-link">📖 Peminjaman</a>
+    <a href="#" class="nav-link" aria-disabled="true" title="Segera hadir pada Fase 3">📦 Pesanan</a>
+
+    <div class="sidebar-group-label">PRODUKSI</div>
+    <a href="#" class="nav-link" aria-disabled="true" title="Segera hadir">🎙 Produksi DTB</a>
+
+    <div class="sidebar-group-label">SISTEM</div>
+    <a href="#" class="nav-link" aria-disabled="true" title="Segera hadir">👤 Akun</a>
+    <a href="#" class="nav-link" aria-disabled="true" title="Segera hadir">⚙ Pengaturan</a>
+
+    <div class="sidebar-group-label">AKSESIBILITAS</div>
+    <div class="form-field" style="margin:0 8px 8px;">
+      <label for="font-size-select">Ukuran Font</label>
+      <select id="font-size-select">
+        <option value="100">100%</option>
+        <option value="125">125%</option>
+        <option value="150">150%</option>
+        <option value="175">175%</option>
+        <option value="200">200%</option>
+      </select>
+    </div>
+    <div class="form-field" style="margin:0 8px 8px;">
+      <label for="font-family-select">Jenis Huruf</label>
+      <select id="font-family-select">
+        <option value="atkinson">Atkinson Hyperlegible</option>
+        <option value="arial">Arial</option>
+        <option value="verdana">Verdana</option>
+      </select>
+    </div>
+    <div class="form-field" style="margin:0 8px 8px; display:flex; align-items:center; gap:8px;">
+      <input type="checkbox" id="contrast-toggle">
+      <label for="contrast-toggle" style="margin:0;">Kontras Tinggi</label>
+    </div>
+  </nav>
+
+  <main id="main-content" class="content">
+    <h1>Data Anggota</h1>
+
+    <div class="toolbar">
+      <button id="btn-add-member" class="btn btn-primary">+ Tambah Anggota</button>
+      <div class="search-box">
+        <label for="member-search-input" class="sr-only">Cari anggota</label>
+        <input type="text" id="member-search-input" placeholder="Cari anggota...">
+      </div>
+      <div class="form-field" style="margin:0; min-width:160px;">
+        <label for="member-search-field" class="sr-only">Cari berdasarkan</label>
+        <select id="member-search-field">
+          <option value="Nama">Nama</option>
+          <option value="No. Anggota">No. Anggota</option>
+          <option value="Telepon">Telepon</option>
+          <option value="Pekerjaan">Pekerjaan</option>
+        </select>
+      </div>
+    </div>
+
+    <p id="members-count" style="color:var(--color-muted);"></p>
+    <p id="members-empty" class="hidden" role="status"></p>
+
+    <div class="card" style="overflow-x:auto;">
+      <table class="data-table responsive-cards">
+        <thead>
+          <tr>
+            <th scope="col">Nama</th>
+            <th scope="col">No. Anggota</th>
+            <th scope="col">BT/LV</th>
+            <th scope="col">Telepon</th>
+            <th scope="col">Status</th>
+            <th scope="col">Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="members-tbody"></tbody>
+      </table>
+    </div>
+  </main>
+</div>
+
+<div id="member-form-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="member-form-title">
+  <div class="modal-box">
+    <h2 id="member-form-title">Tambah Anggota</h2>
+    <div id="member-form-error" class="login-error hidden" role="alert"></div>
+    <form id="member-form" novalidate>
+      <div class="form-row">
+        <div class="form-field"><label for="m-nama">Nama *</label><input type="text" id="m-nama" name="Nama" required></div>
+        <div class="form-field"><label for="m-noanggota">No. Anggota</label><input type="text" id="m-noanggota" name="No. Anggota"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-field">
+          <label for="m-lp">L/P</label>
+          <select id="m-lp" name="L/P">
+            <option value="">- Pilih -</option>
+            <option value="Laki-laki">Laki-laki</option>
+            <option value="Perempuan">Perempuan</option>
+          </select>
+        </div>
+        <div class="form-field"><label for="m-tgllahir">Tanggal Lahir</label><input type="date" id="m-tgllahir" name="Tanggal Lahir"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-field"><label for="m-agama">Agama</label><input type="text" id="m-agama" name="Agama"></div>
+        <div class="form-field">
+          <label for="m-btlv">BT/LV</label>
+          <select id="m-btlv" name="BT/LV">
+            <option value="">- Pilih -</option>
+            <option value="Buta Total">Buta Total</option>
+            <option value="Low Vision">Low Vision</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-field"><label for="m-pendidikan">Pendidikan</label><input type="text" id="m-pendidikan" name="Pendidikan"></div>
+      <div class="form-field"><label for="m-alamat1">Alamat 1</label><input type="text" id="m-alamat1" name="Alamat 1"></div>
+      <div class="form-field"><label for="m-alamat2">Alamat 2</label><input type="text" id="m-alamat2" name="Alamat 2"></div>
+      <div class="form-row">
+        <div class="form-field"><label for="m-telepon">Telepon</label><input type="text" id="m-telepon" name="Telepon"></div>
+        <div class="form-field"><label for="m-pekerjaan">Pekerjaan</label><input type="text" id="m-pekerjaan" name="Pekerjaan"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-field">
+          <label for="m-status">Status</label>
+          <select id="m-status" name="Status">
+            <option value="Aktif">Aktif</option>
+            <option value="Tidak Aktif">Tidak Aktif</option>
+          </select>
+        </div>
+        <div class="form-field"><label for="m-tgldaftar">Tanggal Daftar</label><input type="date" id="m-tgldaftar" name="Tanggal Daftar"></div>
+      </div>
+      <div style="display:flex; gap:12px; justify-content:flex-end; margin-top:8px;">
+        <button type="button" id="btn-cancel-member-form" class="btn btn-outline">Batal</button>
+        <button type="submit" class="btn btn-primary">Simpan</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="member-detail-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="member-detail-title">
+  <div class="modal-box">
+    <h2 id="member-detail-title">Detail Anggota</h2>
+    <div id="member-detail-body"></div>
+    <div style="text-align:right; margin-top:16px;">
+      <button type="button" id="btn-close-member-detail" class="btn btn-outline">Tutup</button>
+    </div>
+  </div>
+</div>
+
+<script src="../assets/js/accessibility.js"></script>
+<script src="../assets/js/api.js"></script>
+<script src="../assets/js/auth.js"></script>
+<script src="../assets/js/app.js"></script>
+<script src="../assets/js/members.js"></script>
+</body>
+</html>
