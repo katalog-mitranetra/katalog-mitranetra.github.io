@@ -1,18 +1,24 @@
-# Katalog Digital Talking Book (KDTB) — Fase 1
+# Katalog Digital Talking Book (KDTB) — Fase 1 & Fase 2
 
-Fase 1: **Login → Dashboard → Data DTB (CRUD)**, sesuai SRS.
+- Fase 1: **Login → Dashboard → Data DTB (CRUD)**
+- Fase 2: **Data Anggota (CRUD) → Peminjaman (cari anggota, cari buku + entri manual, keranjang, simpan transaksi, riwayat + ubah status)**
+
+sesuai SRS.
 
 ## 1. Setup Backend (Google Apps Script + Sheets)
 
 1. Buat Google Sheet baru, misalnya beri nama `DB_KDTB`.
 2. Buka **Extensions > Apps Script**.
-3. Hapus isi `Code.gs` bawaan, lalu buat 8 file `.gs` berikut (nama file harus sama persis) dan salin isinya dari folder `apps-script/` di paket ini:
+3. Hapus isi `Code.gs` bawaan, lalu buat 11 file `.gs` berikut (nama file harus sama persis) dan salin isinya dari folder `apps-script/` di paket ini:
    - `Config.gs`
    - `Utils.gs`
    - `Validation.gs`
    - `Logger.gs`
    - `Auth.gs`
    - `Books.gs`
+   - `Anggota.gs`
+   - `MasterData.gs`
+   - `Loans.gs`
    - `Dashboard.gs`
    - `Code.gs`
 4. Di dropdown fungsi (samping tombol Run/Debug), pilih `setupSheets`, lalu klik **Run**.
@@ -48,7 +54,9 @@ katalog-dtb/
 ├── login.html
 ├── dashboard.html
 ├── pages/
-│   └── books.html       # Data DTB (CRUD)
+│   ├── books.html        # Data DTB (CRUD)
+│   ├── members.html      # Data Anggota (CRUD)
+│   └── loans.html        # Peminjaman (transaksi + riwayat)
 ├── assets/
 │   ├── css/
 │   │   ├── app.css
@@ -60,7 +68,9 @@ katalog-dtb/
 │       ├── accessibility.js  # dark mode, ukuran font, kontras tinggi
 │       ├── app.js          # shell: sidebar, header, kontrol aksesibilitas
 │       ├── dashboard.js
-│       └── books.js
+│       ├── books.js
+│       ├── members.js
+│       └── loans.js
 └── apps-script/
     ├── Config.gs
     ├── Utils.gs
@@ -68,6 +78,9 @@ katalog-dtb/
     ├── Logger.gs
     ├── Auth.gs
     ├── Books.gs
+    ├── Anggota.gs
+    ├── MasterData.gs
+    ├── Loans.gs
     ├── Dashboard.gs
     └── Code.gs            # doGet/doPost router + setupSheets()
 ```
@@ -79,10 +92,17 @@ katalog-dtb/
 - Data DTB: tambah, ubah, hapus (soft delete via kolom Status), detail, live search + auto-suggest per field, tabel responsif (jadi kartu di mobile).
 - Aksesibilitas: dark/light mode, ukuran font 100–200%, pilihan Atkinson Hyperlegible/Arial/Verdana, mode kontras tinggi, skip-link, fokus keyboard terlihat jelas, seluruh ikon aksi punya `aria-label`. Semua preferensi tersimpan di `localStorage`.
 
-## 6. Belum Dikerjakan (Fase 2+)
+## 6. Yang Sudah Jalan di Fase 2
 
-Data Anggota, Peminjaman, Pesanan + WhatsApp, Produksi DTB, Akun, Pengaturan, Log Aktivitas viewer, backup otomatis — menyusul sesuai urutan fase pada SRS.
+- Data Anggota: tambah, ubah, "nonaktifkan" (soft delete via Status = Tidak Aktif), detail, cari (Nama/No. Anggota/Telepon/Pekerjaan).
+- Peminjaman: pilih tanggal & jenis (dropdown diambil dari sheet `MASTER_JENIS`), cari & pilih anggota (live search), cari judul dari katalog Data DTB dan tambahkan ke keranjang, atau tambahkan **judul manual** (untuk EPub/Braille/format lain yang belum ada di katalog) dengan opsi "Simpan juga sebagai master buku".
+- Simpan transaksi membuat 1 baris di `PEMINJAMAN` + N baris di `PEMINJAMAN_DETAIL` (kolom `Sumber` menandai `Katalog` atau `Manual`).
+- Riwayat Peminjaman: daftar transaksi, filter status, cari nama anggota/nomor peminjaman, ubah status langsung dari tabel (Draft/Menunggu/Diproses/Dikirim/Selesai/Dibatalkan), dan detail per transaksi.
 
-## 7. Catatan Keamanan
+## 7. Belum Dikerjakan (Fase 3+)
+
+Pesanan + kirim WhatsApp ke operator, Produksi DTB, Akun (ganti password dari UI), Pengaturan, Log Aktivitas viewer, backup otomatis — menyusul sesuai urutan fase pada SRS.
+
+## 8. Catatan Keamanan
 
 Password di-hash SHA-256 sebelum disimpan (tidak plain text). Tetap disarankan menambahkan salt per-user pada iterasi berikutnya untuk pertahanan lebih baik terhadap rainbow table.
