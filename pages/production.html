@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Produksi DTB — Katalog Digital Talking Book</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/app.css">
+<link rel="stylesheet" href="../assets/css/accessibility.css">
+<link rel="stylesheet" href="../assets/css/dark-mode.css">
+<style>
+  .detail-list { display: grid; grid-template-columns: 160px 1fr; gap: 8px 16px; }
+  .detail-list dt { font-weight: 600; color: var(--color-muted); }
+  .detail-list dd { margin: 0; }
+  .link-like {
+    background: none; border: none; color: var(--color-primary);
+    text-decoration: underline; cursor: pointer; font-size: inherit; padding: 0; text-align: left;
+  }
+  #linked-book-box {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 12px; border: 1px solid var(--color-border); border-radius: var(--radius);
+    background: var(--color-bg); margin-top: 8px;
+  }
+</style>
+</head>
+<body class="font-atkinson">
+<a href="#main-content" class="skip-link">Lewati ke konten utama</a>
+
+<header class="app-header">
+  <div class="brand">
+    <button id="sidebar-toggle" class="icon-btn offcanvas-toggle" aria-label="Buka menu">☰</button>
+    <span>Katalog Digital Talking Book</span>
+  </div>
+  <div class="header-actions">
+    <span id="current-user" style="margin-right:8px;font-size:0.9rem;"></span>
+    <button id="theme-toggle" class="icon-btn">🌙 Gelap</button>
+    <button id="logout-btn" class="icon-btn">Keluar</button>
+  </div>
+</header>
+
+<div class="app-layout">
+  <nav id="sidebar" class="sidebar" aria-label="Menu utama">
+    <a href="../dashboard.html" class="nav-link">📊 Dashboard</a>
+
+    <div class="sidebar-group-label">MASTER</div>
+    <a href="books.html" class="nav-link">📚 Data DTB</a>
+    <a href="members.html" class="nav-link">👥 Data Anggota</a>
+
+    <div class="sidebar-group-label">TRANSAKSI</div>
+    <a href="loans.html" class="nav-link">📖 Peminjaman</a>
+    <a href="orders.html" class="nav-link">📦 Pesanan</a>
+
+    <div class="sidebar-group-label">PRODUKSI</div>
+    <a href="production.html" class="nav-link" aria-current="page">🎙 Produksi DTB</a>
+
+    <div class="sidebar-group-label">SISTEM</div>
+    <a href="#" class="nav-link" aria-disabled="true" title="Segera hadir">👤 Akun</a>
+    <a href="#" class="nav-link" aria-disabled="true" title="Segera hadir">⚙ Pengaturan</a>
+
+    <div class="sidebar-group-label">AKSESIBILITAS</div>
+    <div class="form-field" style="margin:0 8px 8px;">
+      <label for="font-size-select">Ukuran Font</label>
+      <select id="font-size-select">
+        <option value="100">100%</option>
+        <option value="125">125%</option>
+        <option value="150">150%</option>
+        <option value="175">175%</option>
+        <option value="200">200%</option>
+      </select>
+    </div>
+    <div class="form-field" style="margin:0 8px 8px;">
+      <label for="font-family-select">Jenis Huruf</label>
+      <select id="font-family-select">
+        <option value="atkinson">Atkinson Hyperlegible</option>
+        <option value="arial">Arial</option>
+        <option value="verdana">Verdana</option>
+      </select>
+    </div>
+    <div class="form-field" style="margin:0 8px 8px; display:flex; align-items:center; gap:8px;">
+      <input type="checkbox" id="contrast-toggle">
+      <label for="contrast-toggle" style="margin:0;">Kontras Tinggi</label>
+    </div>
+  </nav>
+
+  <main id="main-content" class="content">
+    <h1>Produksi DTB</h1>
+    <p style="color:var(--color-muted); margin-top:-8px;">
+      Alur produksi terpisah dari katalog Data DTB. Saat status diubah menjadi <strong>Selesai</strong> atau <strong>Publish</strong>,
+      judul otomatis dibuat/diperbarui di Data DTB memakai Tanggal Selesai di sini — sehingga statistik Produksi pada Dashboard akurat.
+    </p>
+
+    <div class="toolbar">
+      <button id="btn-add-produksi" class="btn btn-primary">+ Tambah Produksi</button>
+      <div class="search-box">
+        <label for="prod-search-input" class="sr-only">Cari produksi</label>
+        <input type="text" id="prod-search-input" placeholder="Cari judul, pembaca, editor...">
+      </div>
+      <div class="form-field" style="margin:0; min-width:150px;">
+        <label for="prod-search-field" class="sr-only">Cari berdasarkan</label>
+        <select id="prod-search-field">
+          <option value="Judul">Judul</option>
+          <option value="Pembaca">Pembaca</option>
+          <option value="Editor">Editor</option>
+        </select>
+      </div>
+      <div class="form-field" style="margin:0; min-width:160px;">
+        <label for="prod-status-filter" class="sr-only">Filter status</label>
+        <select id="prod-status-filter">
+          <option value="">Semua Status</option>
+          <option value="Antrian">Antrian</option>
+          <option value="Rekaman">Rekaman</option>
+          <option value="Editing">Editing</option>
+          <option value="Proofreading">Proofreading</option>
+          <option value="Selesai">Selesai</option>
+          <option value="Publish">Publish</option>
+        </select>
+      </div>
+    </div>
+
+    <p id="produksi-count" style="color:var(--color-muted);"></p>
+    <p id="produksi-empty" class="hidden" role="status"></p>
+
+    <div class="card" style="overflow-x:auto;">
+      <table class="data-table responsive-cards">
+        <thead id="produksi-thead">
+          <tr>
+            <th scope="col" data-sort-field="Judul">Judul</th>
+            <th scope="col" data-sort-field="Pembaca">Pembaca</th>
+            <th scope="col" data-sort-field="Editor">Editor</th>
+            <th scope="col" data-sort-field="Tanggal Mulai" data-sort-default-dir="desc">Tanggal Mulai</th>
+            <th scope="col" data-sort-field="Tanggal Selesai" data-sort-default-dir="desc">Tanggal Selesai</th>
+            <th scope="col" data-sort-field="Status Produksi">Status</th>
+            <th scope="col">Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="produksi-tbody"></tbody>
+      </table>
+      <div id="produksi-pagination"></div>
+    </div>
+  </main>
+</div>
+
+<div id="prod-form-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="prod-form-title">
+  <div class="modal-box">
+    <h2 id="prod-form-title">Tambah Data Produksi</h2>
+    <div id="prod-form-error" class="login-error hidden" role="alert"></div>
+    <form id="produksi-form" novalidate>
+      <div class="form-field"><label for="p-judul">Judul *</label><input type="text" id="p-judul" name="Judul" required></div>
+      <div class="form-row">
+        <div class="form-field"><label for="p-pengarang">Pengarang</label><input type="text" id="p-pengarang" name="Pengarang"></div>
+        <div class="form-field"><label for="p-pembaca">Pembaca</label><input type="text" id="p-pembaca" name="Pembaca"></div>
+      </div>
+      <div class="form-field"><label for="p-editor">Editor</label><input type="text" id="p-editor" name="Editor"></div>
+      <div class="form-row">
+        <div class="form-field"><label for="p-tglmulai">Tanggal Mulai</label><input type="date" id="p-tglmulai" name="Tanggal Mulai"></div>
+        <div class="form-field"><label for="p-tglselesai">Tanggal Selesai</label><input type="date" id="p-tglselesai" name="Tanggal Selesai"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-field"><label for="p-jambaca">Jam Baca</label><input type="number" id="p-jambaca" name="Jam Baca"></div>
+        <div class="form-field"><label for="p-jamedit">Jam Edit</label><input type="number" id="p-jamedit" name="Jam Edit"></div>
+      </div>
+      <div class="form-field">
+        <label for="p-status">Status Produksi</label>
+        <select id="p-status" name="Status Produksi">
+          <option value="Antrian">Antrian</option>
+          <option value="Rekaman">Rekaman</option>
+          <option value="Editing">Editing</option>
+          <option value="Proofreading">Proofreading</option>
+          <option value="Selesai">Selesai</option>
+          <option value="Publish">Publish</option>
+        </select>
+      </div>
+
+      <div class="form-field">
+        <label id="prod-book-label">Tautkan ke judul Data DTB yang sudah ada (opsional)</label>
+        <input type="text" id="prod-book-search" placeholder="Cari judul di Data DTB..." aria-labelledby="prod-book-label">
+        <div id="prod-book-results"></div>
+        <div id="linked-book-box" class="hidden">
+          <span id="linked-book-name" style="font-weight:600;"></span>
+          <button type="button" id="btn-unlink-book" class="btn btn-outline">Lepas Tautan</button>
+        </div>
+        <p style="color:var(--color-muted); font-size:0.85rem; margin-top:6px;">
+          Kosongkan kalau ini judul baru — akan otomatis dibuat di Data DTB saat status Selesai/Publish.
+        </p>
+      </div>
+
+      <div style="display:flex; gap:12px; justify-content:flex-end; margin-top:8px;">
+        <button type="button" id="btn-cancel-prod-form" class="btn btn-outline">Batal</button>
+        <button type="submit" class="btn btn-primary">Simpan</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="prod-detail-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="prod-detail-title">
+  <div class="modal-box">
+    <h2 id="prod-detail-title">Detail Produksi</h2>
+    <div id="prod-detail-body"></div>
+    <div style="text-align:right; margin-top:16px;">
+      <button type="button" id="btn-close-prod-detail" class="btn btn-outline">Tutup</button>
+    </div>
+  </div>
+</div>
+
+<script src="../assets/js/accessibility.js"></script>
+<script src="../assets/js/api.js"></script>
+<script src="../assets/js/auth.js"></script>
+<script src="../assets/js/app.js"></script>
+<script src="../assets/js/modal.js"></script>
+<script src="../assets/js/table-controls.js"></script>
+<script src="../assets/js/production.js"></script>
+</body>
+</html>

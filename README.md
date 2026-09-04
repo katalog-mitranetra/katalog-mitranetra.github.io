@@ -1,9 +1,10 @@
-# Katalog Digital Talking Book (KDTB) — Fase 1–4 + Peningkatan Tabel & Aksesibilitas
+# Katalog Digital Talking Book (KDTB) — Fase 1–5 + Peningkatan Tabel & Aksesibilitas
 
 - Fase 1: **Login → Dashboard → Data DTB (CRUD)**
 - Fase 2: **Data Anggota (CRUD) → Peminjaman (cari anggota, cari buku + entri manual, keranjang, simpan transaksi, riwayat + ubah status)**
 - Fase 3: **Pesanan → Kirim ke Operator via WhatsApp**
 - Fase 4: **Statistik lanjutan — grafik Peminjaman + Produksi gabungan per bulan, dengan dropdown Tahun**
+- Fase 5: **Produksi DTB — form produksi terpisah + alur status (Antrian→Rekaman→Editing→Proofreading→Selesai→Publish), tersinkron otomatis ke Data DTB**
 - Peningkatan lanjutan: **Pagination + sorting di semua tabel, perbaikan bug Ukuran Font, dan modal HTML pengganti alert/confirm bawaan browser**
 
 sesuai SRS.
@@ -12,7 +13,7 @@ sesuai SRS.
 
 1. Buat Google Sheet baru, misalnya beri nama `DB_KDTB`.
 2. Buka **Extensions > Apps Script**.
-3. Hapus isi `Code.gs` bawaan, lalu buat 12 file `.gs` berikut (nama file harus sama persis) dan salin isinya dari folder `apps-script/` di paket ini:
+3. Hapus isi `Code.gs` bawaan, lalu buat 13 file `.gs` berikut (nama file harus sama persis) dan salin isinya dari folder `apps-script/` di paket ini:
    - `Config.gs`
    - `Utils.gs`
    - `Validation.gs`
@@ -23,6 +24,7 @@ sesuai SRS.
    - `MasterData.gs`
    - `Settings.gs`
    - `Loans.gs`
+   - `Production.gs`
    - `Dashboard.gs`
    - `Code.gs`
 4. Di dropdown fungsi (samping tombol Run/Debug), pilih `setupSheets`, lalu klik **Run**.
@@ -61,7 +63,8 @@ katalog-dtb/
 │   ├── books.html        # Data DTB (CRUD)
 │   ├── members.html      # Data Anggota (CRUD)
 │   ├── loans.html        # Peminjaman (transaksi + riwayat)
-│   └── orders.html       # Pesanan (kirim ke operator via WhatsApp)
+│   ├── orders.html       # Pesanan (kirim ke operator via WhatsApp)
+│   └── production.html   # Produksi DTB (alur status + sinkron ke Data DTB)
 ├── assets/
 │   ├── css/
 │   │   ├── app.css
@@ -77,6 +80,7 @@ katalog-dtb/
 │       ├── members.js
 │       ├── loans.js
 │       ├── orders.js
+│       ├── production.js
 │       ├── modal.js          # AppModal.alert()/AppModal.confirm() — pengganti alert/confirm native
 │       └── table-controls.js # pagination bar + header tabel sortable (dipakai bersama)
 └── apps-script/
@@ -90,6 +94,7 @@ katalog-dtb/
     ├── MasterData.gs
     ├── Settings.gs
     ├── Loans.gs
+    ├── Production.gs
     ├── Dashboard.gs
     └── Code.gs            # doGet/doPost router + setupSheets()
 ```
@@ -122,7 +127,18 @@ katalog-dtb/
 - Grafik garis gabungan menunjukkan jumlah Peminjaman dan jumlah buku selesai Produksi per bulan (Jan–Des) untuk tahun terpilih.
 - Catatan: angka "Produksi" di grafik ini memakai kolom **Tanggal Produksi** pada Data DTB (bukan sheet `PRODUKSI` yang terpisah), karena modul Produksi DTB dengan alur status (Antrian/Rekaman/Editing/Proofreading/Selesai/Publish) belum dibangun — itu bagian dari fase berikutnya.
 
-## 9. Peningkatan Tabel & Aksesibilitas (setelah Fase 4)
+## 9. Yang Sudah Jalan di Fase 5
+
+- Halaman **Produksi DTB** terpisah dari Data DTB: form (Judul, Pengarang, Pembaca, Editor, Tanggal Mulai, Tanggal Selesai, Jam Baca, Jam Edit, Status Produksi), daftar dengan filter status, pagination & sorting.
+- Alur status: **Antrian → Rekaman → Editing → Proofreading → Selesai → Publish**, bisa diubah cepat langsung dari tabel (dropdown per baris, sama seperti di Peminjaman).
+- **Tautan opsional ke Data DTB**: saat menambah/mengubah data produksi, admin bisa mencari & menautkan ke judul yang sudah ada di katalog, atau membiarkannya kosong untuk judul baru.
+- **Sinkronisasi otomatis ke Data DTB**: begitu status diubah menjadi **Selesai** atau **Publish**,
+  - jika sudah tertaut ke judul yang ada → Tanggal Produksi, Pembaca DTB, Editor DTB, Jam Baca DTB, Jam Edit DTB pada Data DTB ikut diperbarui;
+  - jika belum tertaut → judul baru otomatis dibuat di Data DTB, dan tautannya disimpan balik ke record produksi supaya tidak dobel saat status diubah lagi nanti.
+  - Jika Tanggal Selesai belum diisi saat status diubah ke Selesai/Publish, sistem otomatis mengisi tanggal hari itu.
+- **Statistik Produksi di Dashboard sekarang akurat**: kartu "Produksi Tahun Ini" dan grafik gabungan "Peminjaman & Produksi per Bulan" dihitung dari sheet `PRODUKSI` (kolom Tanggal Selesai, hanya status Selesai/Publish) — bukan lagi dari kolom Tanggal Produksi di Data DTB seperti sebelumnya.
+
+## 10. Peningkatan Tabel & Aksesibilitas (setelah Fase 4)
 
 - **Pagination** ditambahkan ke semua halaman yang punya tabel (Data DTB, Data Anggota, Riwayat Peminjaman): dropdown ukuran halaman (25/50/100/250/500, default **50**) + tombol Sebelumnya/Berikutnya. Halaman Pesanan pakai tampilan kartu (bukan tabel) sehingga tidak diberi pagination, sesuai instruksi.
 - **Sorting** — klik judul kolom tabel untuk mengurutkan: kolom teks A-Z/Z-A (locale Indonesia), kolom tanggal terurut kronologis (bukan alfabetis). Ada tanda ▲/▼ di kolom yang sedang aktif diurutkan.
@@ -130,10 +146,10 @@ katalog-dtb/
 - **Bug ukuran font diperbaiki**: sebelumnya elemen `body` memiliki `font-size: 16px` tetap yang menimpa hasil scaling dari fitur "Ukuran Font" di sidebar, sehingga sebagian teks (yang tidak diberi ukuran `rem` eksplisit) tidak ikut membesar/mengecil. Sekarang `body` mewarisi ukuran dari `html` (yang di-scale oleh `accessibility.css`), sehingga **seluruh teks di halaman ikut ter-skala** saat pengaturan 100–200% diubah.
 - **Modal HTML pengganti alert/confirm** — semua `window.alert()` dan `window.confirm()` bawaan browser (yang tampilannya tidak konsisten dan tidak ikut dark mode/kontras tinggi/ukuran font) diganti dengan modal HTML sendiri (`AppModal.alert()` / `AppModal.confirm()`), supaya konfirmasi hapus, notifikasi error, dan pesan sukses semuanya tampil konsisten dengan tema aplikasi dan tetap mengikuti pengaturan aksesibilitas.
 
-## 10. Belum Dikerjakan (Fase 5+)
+## 11. Belum Dikerjakan (Fase 6+)
 
-Modul Produksi DTB (form + status alur produksi terpisah dari Data DTB), Akun (ganti password dari UI), Pengaturan (kelola Master Jenis & Operator dari UI, bukan lewat kode), Log Aktivitas viewer, backup otomatis, dark mode / font size audit menyeluruh — menyusul sesuai urutan fase pada SRS.
+Akun (ganti password dari UI), Pengaturan (kelola Master Jenis & Operator dari UI, bukan lewat kode), Log Aktivitas viewer, backup otomatis, audit aksesibilitas menyeluruh — menyusul sesuai urutan fase pada SRS.
 
-## 11. Catatan Keamanan
+## 12. Catatan Keamanan
 
 Password di-hash SHA-256 sebelum disimpan (tidak plain text). Tetap disarankan menambahkan salt per-user pada iterasi berikutnya untuk pertahanan lebih baik terhadap rainbow table.
