@@ -1,8 +1,10 @@
 const state = {
   page: 1,
-  pageSize: 10,
+  pageSize: 50,
   field: 'Judul',
   q: '',
+  sortField: 'Tanggal Produksi',
+  sortDir: 'desc',
   editingId: null
 };
 
@@ -20,6 +22,17 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('book-form').addEventListener('submit', onSubmitForm);
   document.getElementById('btn-cancel-form').addEventListener('click', closeForm);
   document.getElementById('btn-close-detail').addEventListener('click', closeDetail);
+
+  TableControls.bindSortableHeaders(
+    document.getElementById('books-thead'),
+    () => state,
+    (field, dir) => {
+      state.sortField = field;
+      state.sortDir = dir;
+      state.page = 1;
+      loadBooks();
+    }
+  );
 });
 
 function debounce(fn, delay) {
@@ -55,7 +68,10 @@ async function loadSuggestions(query) {
 }
 
 async function loadBooks() {
-  const res = await API.get('books', { q: state.q, field: state.field, page: state.page, pageSize: state.pageSize });
+  const res = await API.get('books', {
+    q: state.q, field: state.field, page: state.page, pageSize: state.pageSize,
+    sortField: state.sortField, sortDir: state.sortDir
+  });
   const tbody = document.getElementById('books-tbody');
   const emptyState = document.getElementById('books-empty');
 
@@ -64,11 +80,14 @@ async function loadBooks() {
     emptyState.textContent = (res && res.message) || 'Gagal memuat data buku.';
     emptyState.classList.remove('hidden');
     document.getElementById('books-count').textContent = '';
+    document.getElementById('books-pagination').innerHTML = '';
     return;
   }
 
   const items = res.data.items;
   const total = res.data.total;
+  state.sortField = res.data.sortField || state.sortField;
+  state.sortDir = res.data.sortDir || state.sortDir;
 
   if (!items.length) {
     tbody.innerHTML = '';
@@ -85,6 +104,12 @@ async function loadBooks() {
       btn.addEventListener('click', () => onDelete(btn.dataset.id, btn.dataset.title)));
   }
   document.getElementById('books-count').textContent = total + ' judul ditemukan';
+
+  TableControls.updateSortIndicators(document.getElementById('books-thead'), state);
+  TableControls.renderPagination(document.getElementById('books-pagination'), { page: state.page, pageSize: state.pageSize, total: total }, {
+    onPageChange: (page) => { state.page = page; loadBooks(); },
+    onPageSizeChange: (pageSize) => { state.pageSize = pageSize; state.page = 1; loadBooks(); }
+  });
 }
 
 function rowTemplate(b) {
@@ -184,11 +209,11 @@ async function onSubmitForm(e) {
 }
 
 async function onDelete(id, title) {
-  const confirmed = window.confirm('Apakah Anda yakin ingin menghapus "' + title + '"?');
+  const confirmed = await AppModal.confirm('Apakah Anda yakin ingin menghapus "' + title + '"?', 'Hapus Buku');
   if (!confirmed) return;
   const res = await API.post('deleteBook', { id: id });
   if (!res || !res.success) {
-    alert((res && res.message) || 'Gagal menghapus data.');
+    await AppModal.alert((res && res.message) || 'Gagal menghapus data.');
     return;
   }
   loadBooks();

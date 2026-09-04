@@ -1,8 +1,10 @@
-# Katalog Digital Talking Book (KDTB) — Fase 1, 2 & 3
+# Katalog Digital Talking Book (KDTB) — Fase 1–4 + Peningkatan Tabel & Aksesibilitas
 
 - Fase 1: **Login → Dashboard → Data DTB (CRUD)**
 - Fase 2: **Data Anggota (CRUD) → Peminjaman (cari anggota, cari buku + entri manual, keranjang, simpan transaksi, riwayat + ubah status)**
 - Fase 3: **Pesanan → Kirim ke Operator via WhatsApp**
+- Fase 4: **Statistik lanjutan — grafik Peminjaman + Produksi gabungan per bulan, dengan dropdown Tahun**
+- Peningkatan lanjutan: **Pagination + sorting di semua tabel, perbaikan bug Ukuran Font, dan modal HTML pengganti alert/confirm bawaan browser**
 
 sesuai SRS.
 
@@ -74,7 +76,9 @@ katalog-dtb/
 │       ├── books.js
 │       ├── members.js
 │       ├── loans.js
-│       └── orders.js
+│       ├── orders.js
+│       ├── modal.js          # AppModal.alert()/AppModal.confirm() — pengganti alert/confirm native
+│       └── table-controls.js # pagination bar + header tabel sortable (dipakai bersama)
 └── apps-script/
     ├── Config.gs
     ├── Utils.gs
@@ -112,10 +116,24 @@ katalog-dtb/
 - Setelah dikirim, status pesanan otomatis berubah dari **Menunggu** menjadi **Dikirim** (masih bisa diubah manual dari halaman Peminjaman jika perlu).
 - Nomor telepon (operator maupun anggota) dirapikan otomatis ke format internasional (`08...` → `62...`) sebelum dipakai di link `wa.me`.
 
-## 8. Belum Dikerjakan (Fase 4+)
+## 8. Yang Sudah Jalan di Fase 4
 
-Statistik lanjutan (grafik peminjaman & produksi bulanan gabungan), Produksi DTB, Akun (ganti password dari UI), Pengaturan (kelola Master Jenis dari UI), Log Aktivitas viewer, backup otomatis — menyusul sesuai urutan fase pada SRS.
+- Dashboard menampilkan kartu grafik **"Peminjaman & Produksi per Bulan"** dengan dropdown Tahun (otomatis terisi dari tahun yang ada pada data Peminjaman & Tanggal Produksi).
+- Grafik garis gabungan menunjukkan jumlah Peminjaman dan jumlah buku selesai Produksi per bulan (Jan–Des) untuk tahun terpilih.
+- Catatan: angka "Produksi" di grafik ini memakai kolom **Tanggal Produksi** pada Data DTB (bukan sheet `PRODUKSI` yang terpisah), karena modul Produksi DTB dengan alur status (Antrian/Rekaman/Editing/Proofreading/Selesai/Publish) belum dibangun — itu bagian dari fase berikutnya.
 
-## 9. Catatan Keamanan
+## 9. Peningkatan Tabel & Aksesibilitas (setelah Fase 4)
+
+- **Pagination** ditambahkan ke semua halaman yang punya tabel (Data DTB, Data Anggota, Riwayat Peminjaman): dropdown ukuran halaman (25/50/100/250/500, default **50**) + tombol Sebelumnya/Berikutnya. Halaman Pesanan pakai tampilan kartu (bukan tabel) sehingga tidak diberi pagination, sesuai instruksi.
+- **Sorting** — klik judul kolom tabel untuk mengurutkan: kolom teks A-Z/Z-A (locale Indonesia), kolom tanggal terurut kronologis (bukan alfabetis). Ada tanda ▲/▼ di kolom yang sedang aktif diurutkan.
+- **Default urutan Data DTB**: Tanggal Produksi, dari **terbaru ke terlama**.
+- **Bug ukuran font diperbaiki**: sebelumnya elemen `body` memiliki `font-size: 16px` tetap yang menimpa hasil scaling dari fitur "Ukuran Font" di sidebar, sehingga sebagian teks (yang tidak diberi ukuran `rem` eksplisit) tidak ikut membesar/mengecil. Sekarang `body` mewarisi ukuran dari `html` (yang di-scale oleh `accessibility.css`), sehingga **seluruh teks di halaman ikut ter-skala** saat pengaturan 100–200% diubah.
+- **Modal HTML pengganti alert/confirm** — semua `window.alert()` dan `window.confirm()` bawaan browser (yang tampilannya tidak konsisten dan tidak ikut dark mode/kontras tinggi/ukuran font) diganti dengan modal HTML sendiri (`AppModal.alert()` / `AppModal.confirm()`), supaya konfirmasi hapus, notifikasi error, dan pesan sukses semuanya tampil konsisten dengan tema aplikasi dan tetap mengikuti pengaturan aksesibilitas.
+
+## 10. Belum Dikerjakan (Fase 5+)
+
+Modul Produksi DTB (form + status alur produksi terpisah dari Data DTB), Akun (ganti password dari UI), Pengaturan (kelola Master Jenis & Operator dari UI, bukan lewat kode), Log Aktivitas viewer, backup otomatis, dark mode / font size audit menyeluruh — menyusul sesuai urutan fase pada SRS.
+
+## 11. Catatan Keamanan
 
 Password di-hash SHA-256 sebelum disimpan (tidak plain text). Tetap disarankan menambahkan salt per-user pada iterasi berikutnya untuk pertahanan lebih baik terhadap rainbow table.

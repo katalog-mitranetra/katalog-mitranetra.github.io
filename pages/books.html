@@ -105,18 +105,19 @@
 
     <div class="card" style="overflow-x:auto;">
       <table class="data-table responsive-cards">
-        <thead>
+        <thead id="books-thead">
           <tr>
-            <th scope="col">Judul</th>
-            <th scope="col">Pengarang</th>
-            <th scope="col">Penerbit</th>
-            <th scope="col">Pembaca DTB</th>
-            <th scope="col">Tanggal Produksi</th>
+            <th scope="col" data-sort-field="Judul">Judul</th>
+            <th scope="col" data-sort-field="Pengarang">Pengarang</th>
+            <th scope="col" data-sort-field="Penerbit">Penerbit</th>
+            <th scope="col" data-sort-field="Pembaca DTB">Pembaca DTB</th>
+            <th scope="col" data-sort-field="Tanggal Produksi" data-sort-default-dir="desc">Tanggal Produksi</th>
             <th scope="col">Aksi</th>
           </tr>
         </thead>
         <tbody id="books-tbody"></tbody>
       </table>
+      <div id="books-pagination"></div>
     </div>
   </main>
 </div>
@@ -172,6 +173,8 @@
 <script src="../assets/js/api.js"></script>
 <script src="../assets/js/auth.js"></script>
 <script src="../assets/js/app.js"></script>
+<script src="../assets/js/modal.js"></script>
+<script src="../assets/js/table-controls.js"></script>
 <script src="../assets/js/books.js"></script>
 </body>
 </html>

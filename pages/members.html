@@ -103,18 +103,19 @@
 
     <div class="card" style="overflow-x:auto;">
       <table class="data-table responsive-cards">
-        <thead>
+        <thead id="members-thead">
           <tr>
-            <th scope="col">Nama</th>
-            <th scope="col">No. Anggota</th>
-            <th scope="col">BT/LV</th>
-            <th scope="col">Telepon</th>
-            <th scope="col">Status</th>
+            <th scope="col" data-sort-field="Nama">Nama</th>
+            <th scope="col" data-sort-field="No. Anggota">No. Anggota</th>
+            <th scope="col" data-sort-field="BT/LV">BT/LV</th>
+            <th scope="col" data-sort-field="Telepon">Telepon</th>
+            <th scope="col" data-sort-field="Status">Status</th>
             <th scope="col">Aksi</th>
           </tr>
         </thead>
         <tbody id="members-tbody"></tbody>
       </table>
+      <div id="members-pagination"></div>
     </div>
   </main>
 </div>
@@ -189,6 +190,8 @@
 <script src="../assets/js/api.js"></script>
 <script src="../assets/js/auth.js"></script>
 <script src="../assets/js/app.js"></script>
+<script src="../assets/js/modal.js"></script>
+<script src="../assets/js/table-controls.js"></script>
 <script src="../assets/js/members.js"></script>
 </body>
 </html>

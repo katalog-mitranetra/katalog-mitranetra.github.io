@@ -39,7 +39,7 @@ async function onSaveOperatorNumber() {
     msg.classList.remove('hidden');
     setTimeout(() => msg.classList.add('hidden'), 2000);
   } else {
-    alert((res && res.message) || 'Gagal menyimpan nomor operator.');
+    await AppModal.alert((res && res.message) || 'Gagal menyimpan nomor operator.');
   }
 }
 
@@ -137,13 +137,13 @@ function closeOrderDetail() {
 async function onKirimWA(id) {
   const operatorPhoneRaw = document.getElementById('operator-phone').value.trim();
   if (!operatorPhoneRaw) {
-    alert('Nomor WhatsApp operator belum diisi. Isi dan simpan dulu di bagian atas halaman.');
+    await AppModal.alert('Nomor WhatsApp operator belum diisi. Isi dan simpan dulu di bagian atas halaman.');
     return;
   }
 
   const res = await API.get('loanDetail', { id: id });
   if (!res || !res.success || !res.data) {
-    alert('Gagal mengambil detail pesanan.');
+    await AppModal.alert('Gagal mengambil detail pesanan.');
     return;
   }
   const { loan, items } = res.data;

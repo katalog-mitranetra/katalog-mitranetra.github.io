@@ -102,9 +102,21 @@
       </div>
     </section>
 
-    <p style="color:var(--color-muted); font-size:0.9rem;">
-      Grafik peminjaman dan produksi bulanan akan tersedia setelah modul Peminjaman (Fase 2) dan Produksi DTB dibangun.
-    </p>
+    <section class="chart-grid" style="grid-template-columns: 1fr;">
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+          <h2 style="margin:0;">Peminjaman &amp; Produksi per Bulan</h2>
+          <div class="form-field" style="margin:0; min-width:140px;">
+            <label for="stat-year-select">Tahun</label>
+            <select id="stat-year-select"></select>
+          </div>
+        </div>
+        <canvas id="chart-combined" role="img" aria-label="Grafik jumlah peminjaman dan produksi per bulan"></canvas>
+        <p style="color:var(--color-muted); font-size:0.85rem; margin-top:12px; margin-bottom:0;">
+          Produksi dihitung dari kolom Tanggal Produksi pada Data DTB.
+        </p>
+      </div>
+    </section>
   </main>
 </div>
 

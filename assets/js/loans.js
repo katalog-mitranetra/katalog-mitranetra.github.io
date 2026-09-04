@@ -5,9 +5,11 @@ const loanForm = {
 
 const loanHistory = {
   page: 1,
-  pageSize: 10,
+  pageSize: 50,
   q: '',
-  status: ''
+  status: '',
+  sortField: 'Tanggal',
+  sortDir: 'desc'
 };
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -34,6 +36,17 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   document.getElementById('btn-close-loan-detail').addEventListener('click', closeLoanDetail);
+
+  TableControls.bindSortableHeaders(
+    document.getElementById('loans-thead'),
+    () => loanHistory,
+    (field, dir) => {
+      loanHistory.sortField = field;
+      loanHistory.sortDir = dir;
+      loanHistory.page = 1;
+      loadLoans();
+    }
+  );
 });
 
 function debounce(fn, delay) {
@@ -284,7 +297,7 @@ async function onSaveLoan() {
   renderSelectedMember();
   document.getElementById('l-tanggal').valueAsDate = new Date();
   loadLoans();
-  alert('Peminjaman ' + res.id + ' berhasil disimpan.');
+  await AppModal.alert('Peminjaman ' + res.id + ' berhasil disimpan.', 'Berhasil');
 }
 
 /* ---------- Riwayat Peminjaman ---------- */
@@ -297,7 +310,8 @@ async function onLoanHistorySearch(e) {
 
 async function loadLoans() {
   const res = await API.get('loans', {
-    q: loanHistory.q, status: loanHistory.status, page: loanHistory.page, pageSize: loanHistory.pageSize
+    q: loanHistory.q, status: loanHistory.status, page: loanHistory.page, pageSize: loanHistory.pageSize,
+    sortField: loanHistory.sortField, sortDir: loanHistory.sortDir
   });
   const tbody = document.getElementById('loans-tbody');
   const emptyState = document.getElementById('loans-empty');
@@ -306,10 +320,15 @@ async function loadLoans() {
     tbody.innerHTML = '';
     emptyState.textContent = (res && res.message) || 'Gagal memuat riwayat peminjaman.';
     emptyState.classList.remove('hidden');
+    document.getElementById('loans-pagination').innerHTML = '';
     return;
   }
 
   const items = res.data.items;
+  const total = res.data.total;
+  loanHistory.sortField = res.data.sortField || loanHistory.sortField;
+  loanHistory.sortDir = res.data.sortDir || loanHistory.sortDir;
+
   if (!items.length) {
     tbody.innerHTML = '';
     emptyState.textContent = 'Belum ada transaksi peminjaman.';
@@ -322,7 +341,13 @@ async function loadLoans() {
     tbody.querySelectorAll('select[data-action="status"]').forEach(sel =>
       sel.addEventListener('change', () => onChangeLoanStatus(sel.dataset.id, sel.value)));
   }
-  document.getElementById('loans-count').textContent = res.data.total + ' transaksi ditemukan';
+  document.getElementById('loans-count').textContent = total + ' transaksi ditemukan';
+
+  TableControls.updateSortIndicators(document.getElementById('loans-thead'), loanHistory);
+  TableControls.renderPagination(document.getElementById('loans-pagination'), { page: loanHistory.page, pageSize: loanHistory.pageSize, total: total }, {
+    onPageChange: (page) => { loanHistory.page = page; loadLoans(); },
+    onPageSizeChange: (pageSize) => { loanHistory.pageSize = pageSize; loanHistory.page = 1; loadLoans(); }
+  });
 }
 
 const LOAN_STATUSES = ['Draft', 'Menunggu', 'Diproses', 'Dikirim', 'Selesai', 'Dibatalkan'];
@@ -350,7 +375,7 @@ function loanRowTemplate(l) {
 async function onChangeLoanStatus(id, status) {
   const res = await API.post('updateLoanStatus', { id: id, status: status });
   if (!res || !res.success) {
-    alert((res && res.message) || 'Gagal mengubah status.');
+    await AppModal.alert((res && res.message) || 'Gagal mengubah status.');
   }
   loadLoans();
 }

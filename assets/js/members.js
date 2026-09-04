@@ -1,8 +1,10 @@
 const memberState = {
   page: 1,
-  pageSize: 10,
+  pageSize: 50,
   field: 'Nama',
   q: '',
+  sortField: 'Nama',
+  sortDir: 'asc',
   editingId: null
 };
 
@@ -20,6 +22,17 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('member-form').addEventListener('submit', onSubmitMemberForm);
   document.getElementById('btn-cancel-member-form').addEventListener('click', closeMemberForm);
   document.getElementById('btn-close-member-detail').addEventListener('click', closeMemberDetail);
+
+  TableControls.bindSortableHeaders(
+    document.getElementById('members-thead'),
+    () => memberState,
+    (field, dir) => {
+      memberState.sortField = field;
+      memberState.sortDir = dir;
+      memberState.page = 1;
+      loadMembers();
+    }
+  );
 });
 
 function debounce(fn, delay) {
@@ -38,7 +51,8 @@ async function onMemberSearchInput(e) {
 
 async function loadMembers() {
   const res = await API.get('members', {
-    q: memberState.q, field: memberState.field, page: memberState.page, pageSize: memberState.pageSize
+    q: memberState.q, field: memberState.field, page: memberState.page, pageSize: memberState.pageSize,
+    sortField: memberState.sortField, sortDir: memberState.sortDir
   });
   const tbody = document.getElementById('members-tbody');
   const emptyState = document.getElementById('members-empty');
@@ -48,11 +62,14 @@ async function loadMembers() {
     emptyState.textContent = (res && res.message) || 'Gagal memuat data anggota.';
     emptyState.classList.remove('hidden');
     document.getElementById('members-count').textContent = '';
+    document.getElementById('members-pagination').innerHTML = '';
     return;
   }
 
   const items = res.data.items;
   const total = res.data.total;
+  memberState.sortField = res.data.sortField || memberState.sortField;
+  memberState.sortDir = res.data.sortDir || memberState.sortDir;
 
   if (!items.length) {
     tbody.innerHTML = '';
@@ -69,6 +86,12 @@ async function loadMembers() {
       btn.addEventListener('click', () => onDeleteMember(btn.dataset.id, btn.dataset.nama)));
   }
   document.getElementById('members-count').textContent = total + ' anggota ditemukan';
+
+  TableControls.updateSortIndicators(document.getElementById('members-thead'), memberState);
+  TableControls.renderPagination(document.getElementById('members-pagination'), { page: memberState.page, pageSize: memberState.pageSize, total: total }, {
+    onPageChange: (page) => { memberState.page = page; loadMembers(); },
+    onPageSizeChange: (pageSize) => { memberState.pageSize = pageSize; memberState.page = 1; loadMembers(); }
+  });
 }
 
 function memberRowTemplate(m) {
@@ -167,11 +190,11 @@ async function onSubmitMemberForm(e) {
 }
 
 async function onDeleteMember(id, nama) {
-  const confirmed = window.confirm('Nonaktifkan anggota "' + nama + '"? Anggota tidak dihapus permanen, hanya diubah menjadi Tidak Aktif.');
+  const confirmed = await AppModal.confirm('Nonaktifkan anggota "' + nama + '"? Anggota tidak dihapus permanen, hanya diubah menjadi Tidak Aktif.', 'Nonaktifkan Anggota');
   if (!confirmed) return;
   const res = await API.post('deleteMember', { id: id });
   if (!res || !res.success) {
-    alert((res && res.message) || 'Gagal menonaktifkan anggota.');
+    await AppModal.alert((res && res.message) || 'Gagal menonaktifkan anggota.');
     return;
   }
   loadMembers();
