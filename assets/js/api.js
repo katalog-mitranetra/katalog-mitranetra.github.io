@@ -4,7 +4,7 @@
  * (Deploy > New deployment > Web app, lalu salin URL /exec).
  */
 const API = (() => {
-  const SCRIPT_URL = 'https://script.google.com/macros/s/GANTI_DENGAN_DEPLOYMENT_ID/exec';
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxqoxTg2OktxRDZ15dDzGbGuJ-4XA0CVep8uMXIKdkpPiw19b67eZuQ0-DJYZhZqsmQ/exec';
 
   function getToken() {
     return localStorage.getItem('kdtb_token');
