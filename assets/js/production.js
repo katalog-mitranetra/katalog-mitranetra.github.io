@@ -163,13 +163,20 @@ async function openProdDetail(id) {
   document.getElementById('prod-detail-body').innerHTML = `
     <dl class="detail-list">
       <dt>Judul</dt><dd>${escapeHtml(p.Judul)}</dd>
+      <dt>Sub Judul</dt><dd>${escapeHtml(p['Sub Judul'] || '-')}</dd>
+      <dt>Keterangan</dt><dd>${escapeHtml(p.Keterangan || '-')}</dd>
       <dt>Pengarang</dt><dd>${escapeHtml(p.Pengarang || '-')}</dd>
+      <dt>Penerbit</dt><dd>${escapeHtml(p.Penerbit || '-')}</dd>
+      <dt>Cetakan</dt><dd>${escapeHtml(p.Cetakan || '-')}</dd>
+      <dt>Tahun</dt><dd>${escapeHtml(p.Tahun || '-')}</dd>
+      <dt>Halaman</dt><dd>${escapeHtml(p.Halaman || '-')}</dd>
       <dt>Pembaca</dt><dd>${escapeHtml(p.Pembaca || '-')}</dd>
       <dt>Editor</dt><dd>${escapeHtml(p.Editor || '-')}</dd>
-      <dt>Tanggal Mulai</dt><dd>${escapeHtml(formatDate(p['Tanggal Mulai']) || '-')}</dd>
-      <dt>Tanggal Selesai</dt><dd>${escapeHtml(formatDate(p['Tanggal Selesai']) || '-')}</dd>
       <dt>Jam Baca</dt><dd>${escapeHtml(p['Jam Baca'] || '-')}</dd>
       <dt>Jam Edit</dt><dd>${escapeHtml(p['Jam Edit'] || '-')}</dd>
+      <dt>Tanggal Mulai</dt><dd>${escapeHtml(formatDate(p['Tanggal Mulai']) || '-')}</dd>
+      <dt>Tanggal Selesai</dt><dd>${escapeHtml(formatDate(p['Tanggal Selesai']) || '-')}</dd>
+      <dt>Alamat File</dt><dd>${escapeHtml(p['Alamat File'] || '-')}</dd>
       <dt>Status Produksi</dt><dd>${escapeHtml(p['Status Produksi'])}</dd>
       <dt>Tertaut Data DTB</dt><dd>${p['ID Buku'] ? escapeHtml(p['ID Buku']) : 'Belum tertaut'}</dd>
     </dl>`;
@@ -221,8 +228,9 @@ async function onSubmitProdForm(e) {
   e.preventDefault();
   const form = e.target;
   const data = {};
-  ['Judul', 'Pengarang', 'Pembaca', 'Editor', 'Tanggal Mulai', 'Tanggal Selesai',
-    'Jam Baca', 'Jam Edit', 'Status Produksi'].forEach(field => {
+  ['Judul', 'Sub Judul', 'Keterangan', 'Pengarang', 'Penerbit', 'Cetakan', 'Tahun', 'Halaman',
+    'Pembaca', 'Editor', 'Jam Baca', 'Jam Edit', 'Tanggal Mulai', 'Tanggal Selesai', 'Alamat File',
+    'Status Produksi'].forEach(field => {
     const input = form.elements.namedItem(field);
     if (input) data[field] = input.value;
   });
@@ -255,22 +263,56 @@ async function onLinkBookSearch(e) {
     return;
   }
 
-  box.innerHTML = res.data.items.map(b => `
+  const items = res.data.items;
+  box.innerHTML = items.map((b, idx) => `
     <div class="card" style="padding:10px 12px; margin-top:8px; display:flex; justify-content:space-between; align-items:center; gap:8px;">
       <div>
         <strong>${escapeHtml(b.Judul)}</strong><br>
         <span style="color:var(--color-muted); font-size:0.9rem;">${escapeHtml(b.Pengarang || '-')}</span>
       </div>
-      <button type="button" class="btn btn-outline" data-id="${b['ID Buku']}" data-judul="${escapeHtml(b.Judul)}">Tautkan</button>
+      <button type="button" class="btn btn-outline" data-idx="${idx}">Tautkan</button>
     </div>`).join('');
 
-  box.querySelectorAll('button[data-id]').forEach(btn => {
+  box.querySelectorAll('button[data-idx]').forEach(btn => {
     btn.addEventListener('click', () => {
-      prodState.linkedBookId = btn.dataset.id;
-      renderLinkedBook({ id: btn.dataset.id, judul: btn.dataset.judul });
+      const book = items[Number(btn.dataset.idx)];
+      linkExistingBook(book);
       document.getElementById('prod-book-search').value = '';
       box.innerHTML = '';
     });
+  });
+}
+
+/**
+ * Menautkan judul yang sudah ada di Data DTB DAN mengisi ulang field form
+ * dari data buku tersebut, supaya admin tidak perlu mengetik ulang
+ * Pengarang/Penerbit/Cetakan/Tahun/Halaman/Pembaca/Editor/Alamat File.
+ * Tanggal Mulai/Selesai, Jam Baca/Edit, dan Status Produksi tidak disentuh
+ * karena itu murni milik alur produksi, bukan katalog.
+ */
+function linkExistingBook(book) {
+  prodState.linkedBookId = book['ID Buku'];
+  renderLinkedBook({ id: book['ID Buku'], judul: book.Judul });
+
+  const form = document.getElementById('produksi-form');
+  const fieldMap = {
+    Judul: 'Judul',
+    'Sub Judul': 'Sub Judul',
+    Keterangan: 'Keterangan',
+    Pengarang: 'Pengarang',
+    Penerbit: 'Penerbit',
+    Cetakan: 'Cetakan',
+    Tahun: 'Tahun',
+    Halaman: 'Halaman',
+    'Pembaca DTB': 'Pembaca',
+    'Editor DTB': 'Editor',
+    'Alamat File DTB': 'Alamat File'
+  };
+  Object.keys(fieldMap).forEach(bookField => {
+    const input = form.elements.namedItem(fieldMap[bookField]);
+    if (input && book[bookField] !== undefined && book[bookField] !== '') {
+      input.value = book[bookField];
+    }
   });
 }
 
