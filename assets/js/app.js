@@ -5,6 +5,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const userLabel = document.getElementById('current-user');
   if (userLabel && user) userLabel.textContent = user.namaLengkap + ' (' + user.role + ')';
 
+  if (!user || user.role !== 'admin') {
+    document.querySelectorAll('.admin-only').forEach(el => el.remove());
+  }
+
   const sidebar = document.getElementById('sidebar');
   const toggleBtn = document.getElementById('sidebar-toggle');
   if (toggleBtn && sidebar) {
