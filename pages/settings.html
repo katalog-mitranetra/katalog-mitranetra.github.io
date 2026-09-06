@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pengaturan — Katalog Digital Talking Book</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/app.css">
+<link rel="stylesheet" href="../assets/css/accessibility.css">
+<link rel="stylesheet" href="../assets/css/dark-mode.css">
+<style>
+  .operator-row { display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; }
+  .operator-row .form-field { margin: 0; flex: 1; min-width: 220px; }
+  #operator-save-msg { color: var(--color-primary); font-weight: 600; }
+</style>
+</head>
+<body class="font-atkinson">
+<a href="#main-content" class="skip-link">Lewati ke konten utama</a>
+
+<header class="app-header">
+  <div class="brand">
+    <button id="sidebar-toggle" class="icon-btn offcanvas-toggle" aria-label="Buka menu">☰</button>
+    <span>Katalog Digital Talking Book</span>
+  </div>
+  <div class="header-actions">
+    <span id="current-user" style="margin-right:8px;font-size:0.9rem;"></span>
+    <button id="theme-toggle" class="icon-btn">🌙 Gelap</button>
+    <button id="logout-btn" class="icon-btn">Keluar</button>
+  </div>
+</header>
+
+<div class="app-layout">
+  <nav id="sidebar" class="sidebar" aria-label="Menu utama">
+    <a href="../dashboard.html" class="nav-link">📊 Dashboard</a>
+
+    <div class="sidebar-group-label">MASTER</div>
+    <a href="books.html" class="nav-link">📚 Data DTB</a>
+    <a href="members.html" class="nav-link">👥 Data Anggota</a>
+
+    <div class="sidebar-group-label">TRANSAKSI</div>
+    <a href="loans.html" class="nav-link">📖 Peminjaman</a>
+    <a href="orders.html" class="nav-link">📦 Pesanan</a>
+
+    <div class="sidebar-group-label">PRODUKSI</div>
+    <a href="production.html" class="nav-link">🎙 Produksi DTB</a>
+
+    <div class="sidebar-group-label">SISTEM</div>
+    <a href="accounts.html" class="nav-link">👤 Akun</a>
+    <a href="settings.html" class="nav-link admin-only" aria-current="page">⚙ Pengaturan</a>
+    <a href="log.html" class="nav-link admin-only">📜 Log Aktivitas</a>
+
+    <div class="sidebar-group-label">AKSESIBILITAS</div>
+    <div class="form-field" style="margin:0 8px 8px;">
+      <label for="font-size-select">Ukuran Font</label>
+      <select id="font-size-select">
+        <option value="100">100%</option>
+        <option value="125">125%</option>
+        <option value="150">150%</option>
+        <option value="175">175%</option>
+        <option value="200">200%</option>
+      </select>
+    </div>
+    <div class="form-field" style="margin:0 8px 8px;">
+      <label for="font-family-select">Jenis Huruf</label>
+      <select id="font-family-select">
+        <option value="atkinson">Atkinson Hyperlegible</option>
+        <option value="arial">Arial</option>
+        <option value="verdana">Verdana</option>
+      </select>
+    </div>
+    <div class="form-field" style="margin:0 8px 8px; display:flex; align-items:center; gap:8px;">
+      <input type="checkbox" id="contrast-toggle">
+      <label for="contrast-toggle" style="margin:0;">Kontras Tinggi</label>
+    </div>
+  </nav>
+
+  <main id="main-content" class="content">
+    <h1>Pengaturan</h1>
+
+    <div id="settings-content">
+      <div class="card" style="margin-bottom:24px;">
+        <h2 style="margin-top:0;">Nomor WhatsApp Operator</h2>
+        <p style="color:var(--color-muted); margin-top:-8px;">Dipakai saat mengirim pesanan dari halaman Pesanan. Boleh diawali 08... atau +62..., akan dirapikan otomatis.</p>
+        <div class="operator-row">
+          <div class="form-field">
+            <label for="operator-phone" class="sr-only">Nomor WhatsApp Operator</label>
+            <input type="text" id="operator-phone" placeholder="08123456789">
+          </div>
+          <button type="button" id="btn-save-operator" class="btn btn-primary">Simpan</button>
+          <span id="operator-save-msg" class="hidden" role="status">Tersimpan.</span>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:24px;">
+        <h2 style="margin-top:0;">Master Jenis Koleksi</h2>
+        <p style="color:var(--color-muted); margin-top:-8px;">Jenis yang muncul di dropdown Peminjaman (DTB, EPub, Braille, dst). Nonaktifkan jenis yang sudah tidak dipakai, jangan dihapus, supaya riwayat transaksi lama tetap valid.</p>
+
+        <div id="jenis-form-error" class="login-error hidden" role="alert"></div>
+        <form id="jenis-form" novalidate style="display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap; margin-bottom:16px;">
+          <div class="form-field" style="margin:0; flex:1; min-width:200px;">
+            <label for="jenis-nama">Tambah Jenis Baru</label>
+            <input type="text" id="jenis-nama" name="NamaJenis" placeholder="Contoh: Audio Book" required>
+          </div>
+          <button type="submit" class="btn btn-primary">Tambah</button>
+        </form>
+
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th scope="col">Nama Jenis</th>
+              <th scope="col">Status</th>
+            </tr>
+          </thead>
+          <tbody id="jenis-tbody"></tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <h2 style="margin-top:0;">Backup Database</h2>
+        <p style="color:var(--color-muted); margin-top:-8px;">
+          Backup otomatis berjalan setiap hari sekitar jam 02:00 (setelah trigger dipasang lewat <code>setupDailyBackupTrigger()</code> di Apps Script — lihat README). Tombol di bawah untuk membuat salinan manual kapan saja ke folder Google Drive "BACKUP_KDTB".
+        </p>
+        <button type="button" id="btn-run-backup" class="btn btn-primary">Backup Sekarang</button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="../assets/js/accessibility.js"></script>
+<script src="../assets/js/api.js"></script>
+<script src="../assets/js/auth.js"></script>
+<script src="../assets/js/app.js"></script>
+<script src="../assets/js/modal.js"></script>
+<script src="../assets/js/settings.js"></script>
+</body>
+</html>

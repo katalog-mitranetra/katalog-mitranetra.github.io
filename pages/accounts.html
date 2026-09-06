@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Akun — Katalog Digital Talking Book</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/app.css">
+<link rel="stylesheet" href="../assets/css/accessibility.css">
+<link rel="stylesheet" href="../assets/css/dark-mode.css">
+</head>
+<body class="font-atkinson">
+<a href="#main-content" class="skip-link">Lewati ke konten utama</a>
+
+<header class="app-header">
+  <div class="brand">
+    <button id="sidebar-toggle" class="icon-btn offcanvas-toggle" aria-label="Buka menu">☰</button>
+    <span>Katalog Digital Talking Book</span>
+  </div>
+  <div class="header-actions">
+    <span id="current-user" style="margin-right:8px;font-size:0.9rem;"></span>
+    <button id="theme-toggle" class="icon-btn">🌙 Gelap</button>
+    <button id="logout-btn" class="icon-btn">Keluar</button>
+  </div>
+</header>
+
+<div class="app-layout">
+  <nav id="sidebar" class="sidebar" aria-label="Menu utama">
+    <a href="../dashboard.html" class="nav-link">📊 Dashboard</a>
+
+    <div class="sidebar-group-label">MASTER</div>
+    <a href="books.html" class="nav-link">📚 Data DTB</a>
+    <a href="members.html" class="nav-link">👥 Data Anggota</a>
+
+    <div class="sidebar-group-label">TRANSAKSI</div>
+    <a href="loans.html" class="nav-link">📖 Peminjaman</a>
+    <a href="orders.html" class="nav-link">📦 Pesanan</a>
+
+    <div class="sidebar-group-label">PRODUKSI</div>
+    <a href="production.html" class="nav-link">🎙 Produksi DTB</a>
+
+    <div class="sidebar-group-label">SISTEM</div>
+    <a href="accounts.html" class="nav-link" aria-current="page">👤 Akun</a>
+    <a href="settings.html" class="nav-link admin-only">⚙ Pengaturan</a>
+    <a href="log.html" class="nav-link admin-only">📜 Log Aktivitas</a>
+
+    <div class="sidebar-group-label">AKSESIBILITAS</div>
+    <div class="form-field" style="margin:0 8px 8px;">
+      <label for="font-size-select">Ukuran Font</label>
+      <select id="font-size-select">
+        <option value="100">100%</option>
+        <option value="125">125%</option>
+        <option value="150">150%</option>
+        <option value="175">175%</option>
+        <option value="200">200%</option>
+      </select>
+    </div>
+    <div class="form-field" style="margin:0 8px 8px;">
+      <label for="font-family-select">Jenis Huruf</label>
+      <select id="font-family-select">
+        <option value="atkinson">Atkinson Hyperlegible</option>
+        <option value="arial">Arial</option>
+        <option value="verdana">Verdana</option>
+      </select>
+    </div>
+    <div class="form-field" style="margin:0 8px 8px; display:flex; align-items:center; gap:8px;">
+      <input type="checkbox" id="contrast-toggle">
+      <label for="contrast-toggle" style="margin:0;">Kontras Tinggi</label>
+    </div>
+  </nav>
+
+  <main id="main-content" class="content">
+    <h1>Akun</h1>
+
+    <div class="card" style="max-width:480px; margin-bottom:24px;">
+      <h2 style="margin-top:0;">Ganti Password Saya</h2>
+      <div id="change-password-error" class="login-error hidden" role="alert"></div>
+      <div id="change-password-success" class="hidden" role="status" style="background:#E8F5E9; color:#1B5E20; padding:10px 14px; border-radius:8px; margin-bottom:16px;"></div>
+      <form id="change-password-form" novalidate>
+        <div class="form-field">
+          <label for="cp-old">Password Lama</label>
+          <input type="password" id="cp-old" name="oldPassword" autocomplete="current-password" required>
+        </div>
+        <div class="form-field">
+          <label for="cp-new">Password Baru</label>
+          <input type="password" id="cp-new" name="newPassword" autocomplete="new-password" minlength="6" required>
+        </div>
+        <div class="form-field">
+          <label for="cp-confirm">Konfirmasi Password Baru</label>
+          <input type="password" id="cp-confirm" name="confirmPassword" autocomplete="new-password" minlength="6" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Ganti Password</button>
+      </form>
+    </div>
+
+    <div id="accounts-admin-section">
+      <h2>Manajemen Akun</h2>
+
+      <div class="toolbar">
+        <button id="btn-add-account" class="btn btn-primary">+ Tambah Akun</button>
+        <div class="search-box">
+          <label for="account-search-input" class="sr-only">Cari akun</label>
+          <input type="text" id="account-search-input" placeholder="Cari akun...">
+        </div>
+        <div class="form-field" style="margin:0; min-width:160px;">
+          <label for="account-search-field" class="sr-only">Cari berdasarkan</label>
+          <select id="account-search-field">
+            <option value="Nama Lengkap">Nama Lengkap</option>
+            <option value="Username">Username</option>
+            <option value="Nomor HP">Nomor HP</option>
+          </select>
+        </div>
+      </div>
+
+      <p id="accounts-count" style="color:var(--color-muted);"></p>
+      <p id="accounts-empty" class="hidden" role="status"></p>
+
+      <div class="card" style="overflow-x:auto;">
+        <table class="data-table responsive-cards">
+          <thead id="accounts-thead">
+            <tr>
+              <th scope="col" data-sort-field="Nama Lengkap">Nama Lengkap</th>
+              <th scope="col" data-sort-field="Username">Username</th>
+              <th scope="col" data-sort-field="Role">Role</th>
+              <th scope="col" data-sort-field="Status">Status</th>
+              <th scope="col" data-sort-field="Last Login">Last Login</th>
+              <th scope="col">Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="accounts-tbody"></tbody>
+        </table>
+        <div id="accounts-pagination"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div id="account-form-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="account-form-title">
+  <div class="modal-box">
+    <h2 id="account-form-title">Tambah Akun</h2>
+    <div id="account-form-error" class="login-error hidden" role="alert"></div>
+    <form id="account-form" novalidate>
+      <div class="form-field"><label for="a-nama">Nama Lengkap *</label><input type="text" id="a-nama" name="Nama Lengkap" required></div>
+      <div class="form-field"><label for="a-username">Username *</label><input type="text" id="a-username" name="Username" required></div>
+      <div id="account-password-field" class="form-field">
+        <label for="a-password">Password *</label>
+        <input type="password" id="a-password" name="Password" minlength="6" autocomplete="new-password">
+      </div>
+      <div class="form-field"><label for="a-hp">Nomor HP</label><input type="text" id="a-hp" name="Nomor HP"></div>
+      <div class="form-row">
+        <div class="form-field">
+          <label for="a-role">Role</label>
+          <select id="a-role" name="Role">
+            <option value="admin">admin</option>
+            <option value="operator">operator</option>
+            <option value="user" selected>user</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label for="a-status">Status</label>
+          <select id="a-status" name="Status">
+            <option value="Aktif">Aktif</option>
+            <option value="Tidak Aktif">Tidak Aktif</option>
+          </select>
+        </div>
+      </div>
+      <div style="display:flex; gap:12px; justify-content:flex-end; margin-top:8px;">
+        <button type="button" id="btn-cancel-account-form" class="btn btn-outline">Batal</button>
+        <button type="submit" class="btn btn-primary">Simpan</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="reset-password-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="reset-password-title">
+  <div class="modal-box" style="max-width:420px;">
+    <h2 id="reset-password-title">Reset Password</h2>
+    <p>Akun: <strong id="reset-password-username"></strong></p>
+    <div id="reset-password-error" class="login-error hidden" role="alert"></div>
+    <form id="reset-password-form" novalidate>
+      <div class="form-field">
+        <label for="rp-new">Password Baru</label>
+        <input type="password" id="rp-new" name="newPassword" minlength="6" autocomplete="new-password" required>
+      </div>
+      <div class="form-field">
+        <label for="rp-confirm">Konfirmasi Password Baru</label>
+        <input type="password" id="rp-confirm" name="confirmPassword" minlength="6" autocomplete="new-password" required>
+      </div>
+      <div style="display:flex; gap:12px; justify-content:flex-end; margin-top:8px;">
+        <button type="button" id="btn-cancel-reset-password" class="btn btn-outline">Batal</button>
+        <button type="submit" class="btn btn-primary">Reset Password</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="../assets/js/accessibility.js"></script>
+<script src="../assets/js/api.js"></script>
+<script src="../assets/js/auth.js"></script>
+<script src="../assets/js/app.js"></script>
+<script src="../assets/js/modal.js"></script>
+<script src="../assets/js/table-controls.js"></script>
+<script src="../assets/js/accounts.js"></script>
+</body>
+</html>

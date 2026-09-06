@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Log Aktivitas — Katalog Digital Talking Book</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/app.css">
+<link rel="stylesheet" href="../assets/css/accessibility.css">
+<link rel="stylesheet" href="../assets/css/dark-mode.css">
+</head>
+<body class="font-atkinson">
+<a href="#main-content" class="skip-link">Lewati ke konten utama</a>
+
+<header class="app-header">
+  <div class="brand">
+    <button id="sidebar-toggle" class="icon-btn offcanvas-toggle" aria-label="Buka menu">☰</button>
+    <span>Katalog Digital Talking Book</span>
+  </div>
+  <div class="header-actions">
+    <span id="current-user" style="margin-right:8px;font-size:0.9rem;"></span>
+    <button id="theme-toggle" class="icon-btn">🌙 Gelap</button>
+    <button id="logout-btn" class="icon-btn">Keluar</button>
+  </div>
+</header>
+
+<div class="app-layout">
+  <nav id="sidebar" class="sidebar" aria-label="Menu utama">
+    <a href="../dashboard.html" class="nav-link">📊 Dashboard</a>
+
+    <div class="sidebar-group-label">MASTER</div>
+    <a href="books.html" class="nav-link">📚 Data DTB</a>
+    <a href="members.html" class="nav-link">👥 Data Anggota</a>
+
+    <div class="sidebar-group-label">TRANSAKSI</div>
+    <a href="loans.html" class="nav-link">📖 Peminjaman</a>
+    <a href="orders.html" class="nav-link">📦 Pesanan</a>
+
+    <div class="sidebar-group-label">PRODUKSI</div>
+    <a href="production.html" class="nav-link">🎙 Produksi DTB</a>
+
+    <div class="sidebar-group-label">SISTEM</div>
+    <a href="accounts.html" class="nav-link">👤 Akun</a>
+    <a href="settings.html" class="nav-link admin-only">⚙ Pengaturan</a>
+    <a href="log.html" class="nav-link admin-only" aria-current="page">📜 Log Aktivitas</a>
+
+    <div class="sidebar-group-label">AKSESIBILITAS</div>
+    <div class="form-field" style="margin:0 8px 8px;">
+      <label for="font-size-select">Ukuran Font</label>
+      <select id="font-size-select">
+        <option value="100">100%</option>
+        <option value="125">125%</option>
+        <option value="150">150%</option>
+        <option value="175">175%</option>
+        <option value="200">200%</option>
+      </select>
+    </div>
+    <div class="form-field" style="margin:0 8px 8px;">
+      <label for="font-family-select">Jenis Huruf</label>
+      <select id="font-family-select">
+        <option value="atkinson">Atkinson Hyperlegible</option>
+        <option value="arial">Arial</option>
+        <option value="verdana">Verdana</option>
+      </select>
+    </div>
+    <div class="form-field" style="margin:0 8px 8px; display:flex; align-items:center; gap:8px;">
+      <input type="checkbox" id="contrast-toggle">
+      <label for="contrast-toggle" style="margin:0;">Kontras Tinggi</label>
+    </div>
+  </nav>
+
+  <main id="main-content" class="content">
+    <h1>Log Aktivitas</h1>
+    <p style="color:var(--color-muted); margin-top:-8px;">Catatan aktivitas sistem (tambah/ubah/hapus data, login, dsb). Hanya bisa dilihat, tidak bisa diubah atau dihapus dari sini.</p>
+
+    <div id="log-content">
+      <div class="toolbar">
+        <div class="search-box">
+          <label for="log-search" class="sr-only">Cari log aktivitas</label>
+          <input type="text" id="log-search" placeholder="Cari user, aktivitas, data, atau info...">
+        </div>
+      </div>
+
+      <p id="log-count" style="color:var(--color-muted);"></p>
+      <p id="log-empty" class="hidden" role="status"></p>
+
+      <div class="card" style="overflow-x:auto;">
+        <table class="data-table responsive-cards">
+          <thead id="log-thead">
+            <tr>
+              <th scope="col" data-sort-field="Waktu" data-sort-default-dir="desc">Waktu</th>
+              <th scope="col" data-sort-field="User">User</th>
+              <th scope="col" data-sort-field="Aktivitas">Aktivitas</th>
+              <th scope="col" data-sort-field="Data">Data</th>
+              <th scope="col" data-sort-field="Info">Info</th>
+            </tr>
+          </thead>
+          <tbody id="log-tbody"></tbody>
+        </table>
+        <div id="log-pagination"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="../assets/js/accessibility.js"></script>
+<script src="../assets/js/api.js"></script>
+<script src="../assets/js/auth.js"></script>
+<script src="../assets/js/app.js"></script>
+<script src="../assets/js/table-controls.js"></script>
+<script src="../assets/js/log.js"></script>
+</body>
+</html>
